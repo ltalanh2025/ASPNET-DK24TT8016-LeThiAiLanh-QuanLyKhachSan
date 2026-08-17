@@ -1,0 +1,42 @@
+@model QLKS.Models.CustomerLoginViewModel
+@{
+    Layout = "~/Views/Shared/_CustomerAuthLayout.cshtml";
+    ViewBag.Title = "Đăng nhập khách hàng";
+    var hotelName = AppConfig.Get("HotelName", "Khách sạn");
+}
+<div class="resort-auth-shell">
+    <section class="resort-auth-visual login" aria-label="Giới thiệu khách sạn">
+        <div class="resort-auth-visual-shade"></div>
+        <a class="resort-auth-brand" href="@Url.Action("Index", "CustomerHome")">@hotelName</a>
+        <div><h1>@hotelName</h1><p>Trải nghiệm sự sang trọng tĩnh lặng và dịch vụ tận tâm trong từng kỳ nghỉ.</p></div>
+    </section>
+    <section class="resort-auth-panel">
+        <div class="resort-auth-card">
+            @await Html.PartialAsync("_AlertMessages")
+            <div class="text-center"><span class="resort-kicker">Tài khoản khách hàng</span><h1>Chào mừng trở lại</h1><p>Đăng nhập để tiếp tục hành trình của bạn.</p></div>
+            @await Html.PartialAsync("_ValidationSummary")
+            @using (Html.BeginForm("Login", "CustomerAccount", new { returnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "resort-auth-form" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="resort-auth-field">
+                    @Html.LabelFor(x => x.Email)
+                    @Html.TextBoxFor(x => x.Email, new { @class = "form-control", type = "email", autocomplete = "email", placeholder = "vidu@gmail.com" })
+                    @Html.ValidationMessageFor(x => x.Email, "", new { @class = "text-danger small" })
+                </div>
+                <div class="resort-auth-field">
+                    @Html.LabelFor(x => x.MatKhau)
+                    <div class="password-field">
+                        @Html.PasswordFor(x => x.MatKhau, new { @class = "form-control", autocomplete = "current-password", data_caps_lock_target = "capsLockCustomer", placeholder = "Nhập mật khẩu của bạn" })
+                        <button type="button" class="btn btn-sm btn-link password-toggle" data-password-toggle="MatKhau" aria-label="Hiện mật khẩu" aria-pressed="false">Hiện</button>
+                    </div>
+                    <div id="capsLockCustomer" class="caps-lock-warning">Caps Lock đang bật.</div>
+                    @Html.ValidationMessageFor(x => x.MatKhau, "", new { @class = "text-danger small" })
+                </div>
+                <button type="submit" class="btn resort-btn-primary w-100" data-loading-text="Đang đăng nhập...">Đăng nhập <span aria-hidden="true">→</span></button>
+            }
+            <p class="resort-auth-switch">Chưa có tài khoản? <a href="@Url.Action("Register", new { returnUrl = ViewBag.ReturnUrl })">Đăng ký ngay</a></p>
+            <a class="resort-auth-back" href="@Url.Action("Index", "CustomerHome")"><span aria-hidden="true">←</span> Trở về trang chủ</a>
+        </div>
+    </section>
+</div>
+@section scripts { @Scripts.Render("~/bundles/jqueryval") }

@@ -1,0 +1,26 @@
+@model QLKS.Models.RoomViewModelBase
+@{
+    var roomTypes = ViewData["RoomTypes"] as SelectList;
+}
+<div class="row g-3">
+    <div class="col-md-6">
+        @Html.LabelFor(x => x.SoPhong, new { @class = "form-label field-required" })
+        @Html.TextBoxFor(x => x.SoPhong, new { @class = "form-control", maxlength = "20", placeholder = "Ví dụ: 201" })
+        @Html.ValidationMessageFor(x => x.SoPhong, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-md-6">
+        @Html.LabelFor(x => x.Tang, new { @class = "form-label field-required" })
+        @Html.TextBoxFor(x => x.Tang, new { @class = "form-control", type = "number", min = "1", max = "200", inputmode = "numeric", placeholder = "Ví dụ: 2" })
+        @Html.ValidationMessageFor(x => x.Tang, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-12">
+        @Html.LabelFor(x => x.MaLoai, new { @class = "form-label field-required" })
+        @Html.DropDownListFor(x => x.MaLoai, roomTypes, "-- Chọn loại phòng --", new { @class = "form-select" })
+        @Html.ValidationMessageFor(x => x.MaLoai, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-12">
+        @Html.LabelFor(x => x.MoTaChiTiet, new { @class = "form-label" })
+        @Html.TextAreaFor(x => x.MoTaChiTiet, new { @class = "form-control", rows = "4", maxlength = "2000", placeholder = "Ví dụ: View biển, ban công rộng thoáng mát, giường đôi cao cấp..." })
+        @Html.ValidationMessageFor(x => x.MoTaChiTiet, "", new { @class = "text-danger" })
+    </div>
+</div>

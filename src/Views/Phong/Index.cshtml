@@ -1,0 +1,132 @@
+@model QLKS.Models.RoomIndexViewModel
+@using QLKS.Models
+@using QLKS.Services
+@{
+    ViewBag.Title = "Sơ đồ phòng";
+    var role = Convert.ToString(Session[SessionKeys.RoleName]);
+    var canCheckIn = role == RoleNames.Admin || role == RoleNames.Receptionist;
+    var isAdmin = role == RoleNames.Admin;
+}
+@await Html.PartialAsync("_PageHeader", new PageHeaderViewModel
+{
+    Title = "Sơ đồ phòng",
+    Subtitle = "Theo dõi trạng thái và thực hiện nghiệp vụ theo từng phòng.",
+    Icon = "▦",
+    ActionUrl = isAdmin ? Url.Action("Create") : null,
+    ActionText = isAdmin ? "Thêm phòng" : null,
+    ActionIcon = "+"
+})
+
+<form method="get" action="@Url.Action("Index")" class="surface-card filter-card no-print" role="search">
+    <div class="row g-2 align-items-end">
+        <div class="col-sm-6 col-lg-3">
+            <label class="form-label" for="q">Số phòng</label>
+            <input class="form-control" id="q" name="q" value="@Model.Search" placeholder="Tìm theo số phòng (vd: 101, 202...)" />
+        </div>
+        <div class="col-6 col-lg-2">
+            <label class="form-label" for="tang">Tầng</label>
+            <select class="form-select" id="tang" name="tang">
+                <option value="">Tất cả</option>
+                @foreach (var floor in Model.Floors) { <option value="@floor" selected="@(Model.Floor == floor ? "selected" : null)">Tầng @floor</option> }
+            </select>
+        </div>
+        <div class="col-6 col-lg-3">
+            <label class="form-label" for="maLoai">Loại phòng</label>
+            <select class="form-select" id="maLoai" name="maLoai">
+                <option value="">Tất cả</option>
+                @foreach (var type in Model.RoomTypes) { <option value="@type.MaLoai" selected="@(Model.RoomTypeId == type.MaLoai ? "selected" : null)">@type.TenLoai</option> }
+            </select>
+        </div>
+        <div class="col-sm-6 col-lg-2">
+            <label class="form-label" for="trangThai">Trạng thái</label>
+            <select class="form-select" id="trangThai" name="trangThai">
+                <option value="">Tất cả</option>
+                <option value="@RoomStatus.Available" selected="@(Model.Status == RoomStatus.Available ? "selected" : null)">Trống</option>
+                <option value="@RoomStatus.Occupied" selected="@(Model.Status == RoomStatus.Occupied ? "selected" : null)">Đang ở</option>
+                <option value="@RoomStatus.Cleaning" selected="@(Model.Status == RoomStatus.Cleaning ? "selected" : null)">Đang dọn</option>
+                <option value="@RoomStatus.Maintenance" selected="@(Model.Status == RoomStatus.Maintenance ? "selected" : null)">Bảo trì</option>
+            </select>
+        </div>
+        <div class="col-sm-6 col-lg-2 filter-actions">
+            <button type="submit" class="btn btn-primary">Lọc</button>
+            <a href="@Url.Action("Index")" class="btn btn-outline-secondary" aria-label="Xóa bộ lọc">Xóa</a>
+        </div>
+    </div>
+</form>
+
+@if (Model.Rooms != null && Model.Rooms.Any())
+{
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="result-summary">Hiển thị @Model.Rooms.Count phòng</span>
+        <div class="d-flex flex-wrap gap-2 small" aria-label="Chú thích trạng thái">
+            <span class="status-badge status-available">✓ Trống</span><span class="status-badge status-occupied">● Đang ở</span><span class="status-badge status-cleaning">↻ Đang dọn</span><span class="status-badge status-maintenance">! Bảo trì</span>
+        </div>
+    </div>
+    <div class="room-grid">
+    @foreach (var room in Model.Rooms)
+    {
+        var image = string.IsNullOrWhiteSpace(room.AnhDaiDien) ? ImageUploadService.DefaultImage : room.AnhDaiDien;
+        var statusClass = room.TrangThai == RoomStatus.Available ? "status-available" : room.TrangThai == RoomStatus.Occupied ? "status-occupied" : room.TrangThai == RoomStatus.Cleaning ? "status-cleaning" : "status-maintenance";
+        var statusIcon = room.TrangThai == RoomStatus.Available ? "✓" : room.TrangThai == RoomStatus.Occupied ? "●" : room.TrangThai == RoomStatus.Cleaning ? "↻" : "!";
+        var activeStay = Model.ActiveStays != null && Model.ActiveStays.ContainsKey(room.MaPhong) ? Model.ActiveStays[room.MaPhong] : null;
+        <article class="surface-card room-card">
+            <img src="@Url.Content("~/Content/Images/" + image)" class="room-card-image" alt="Ảnh phòng @(string.IsNullOrWhiteSpace(room.SoPhong) ? "chưa đặt số" : room.SoPhong)" loading="lazy" />
+            <div class="room-card-body">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <h2 class="room-number">Phòng @(string.IsNullOrWhiteSpace(room.SoPhong) ? "—" : room.SoPhong)</h2>
+                    @await Html.PartialAsync("_StatusBadge", new StatusBadgeViewModel { Text = room.TrangThai ?? "Chưa rõ", CssClass = statusClass, Icon = statusIcon })
+                </div>
+                <div class="room-meta">
+                    <div class="room-meta-row"><span>Loại phòng</span><strong class="text-dark">@(room.LoaiPhong == null ? "Chưa thiết lập" : room.LoaiPhong.TenLoai)</strong></div>
+                    <div class="room-meta-row"><span>Tầng</span><strong class="text-dark">@(room.Tang.HasValue ? room.Tang.Value.ToString() : "—")</strong></div>
+                    <div class="room-meta-row"><span>Giá phòng</span><strong class="text-dark currency">@(room.LoaiPhong != null && room.LoaiPhong.GiaMacDinh.HasValue ? room.LoaiPhong.GiaMacDinh.Value.ToString("N0") + " đ/ngày" : "Chưa có giá")</strong></div>
+                </div>
+                @if (activeStay != null && canCheckIn)
+                {
+                    <div class="room-guest"><strong>@(string.IsNullOrWhiteSpace(activeStay.CustomerName) ? "Khách lưu trú" : activeStay.CustomerName)</strong><br /><span>Nhận phòng: @(activeStay.CheckIn.HasValue ? activeStay.CheckIn.Value.ToString("dd/MM/yyyy HH:mm") : "—")</span></div>
+                }
+            </div>
+            @if (canCheckIn || isAdmin)
+            {
+                <div class="room-card-actions no-print">
+                    @if (canCheckIn && room.TrangThai == RoomStatus.Available)
+                    {
+                        <a href="@Url.Action("Create", "HoaDon", new { MaPhong = room.MaPhong })" class="btn btn-sm btn-primary flex-grow-1">Nhận phòng</a>
+                    }
+                    @if (canCheckIn && room.TrangThai == RoomStatus.Occupied && activeStay != null)
+                    {
+                        <a href="@Url.Action("Details", "HoaDon", new { id = activeStay.InvoiceId })" class="btn btn-sm btn-primary flex-grow-1">Xem hóa đơn</a>
+                    }
+                    @if (isAdmin)
+                    {
+                        <div class="dropdown ms-auto">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Thao tác khác với phòng @room.SoPhong">Thao tác</button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a href="@Url.Action("Edit", new { id = room.MaPhong })" class="dropdown-item">Chỉnh sửa phòng</a></li>
+                                @if (room.TrangThai == RoomStatus.Available)
+                                { <li><a href="@Url.Action("Delete", new { id = room.MaPhong })" class="dropdown-item text-danger">Xóa phòng</a></li> }
+                                @if (room.TrangThai != RoomStatus.Occupied && room.TrangThai != RoomStatus.Available)
+                                {
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li class="px-2">
+                                    @using (Html.BeginForm("ResetPhong", "Phong", new { id = room.MaPhong }, FormMethod.Post, new { data_confirm = "true", data_confirm_title = "Reset trạng thái phòng", data_confirm_message = "Phòng sẽ được chuyển về trạng thái Trống.", data_confirm_target = "Phòng " + room.SoPhong, data_confirm_button = "Xác nhận reset", data_confirm_class = "btn-danger" }))
+                                    {
+                                        @Html.AntiForgeryToken()<button type="submit" class="dropdown-item text-danger">Reset về Trống</button>
+                                    }
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+            }
+        </article>
+    }
+    </div>
+}
+else
+{
+    <div class="surface-card">
+        @await Html.PartialAsync("_EmptyState", new EmptyStateViewModel { Title = "Không tìm thấy phòng", Message = "Hãy thay đổi bộ lọc hoặc thêm phòng mới nếu khách sạn chưa có dữ liệu.", Icon = "▦", ActionUrl = isAdmin ? Url.Action("Create") : null, ActionText = isAdmin ? "Thêm phòng" : null })
+    </div>
+}

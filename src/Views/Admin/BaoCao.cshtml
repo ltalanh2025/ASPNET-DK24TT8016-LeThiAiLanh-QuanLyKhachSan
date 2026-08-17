@@ -1,0 +1,53 @@
+﻿@model IEnumerable<QLKS.Models.RevenueReportRowViewModel>
+@using QLKS.Models
+@{
+    ViewBag.Title = "Báo cáo doanh thu";
+    var rows = Model == null ? new List<RevenueReportRowViewModel>() : Model.ToList();
+    var totalRevenue = rows.Sum(x => x.DoanhThu);
+    var totalInvoices = rows.Sum(x => x.SoLuongDon);
+}
+@await Html.PartialAsync("_PageHeader", new PageHeaderViewModel { Title = "Báo cáo doanh thu", Subtitle = "Doanh thu từ các hóa đơn đã thanh toán theo ngày checkout.", Icon = "↗" })
+@await Html.PartialAsync("_ValidationSummary")
+
+<form method="get" action="@Url.Action("BaoCao")" class="surface-card filter-card no-print">
+    <div class="row g-2 align-items-end">
+        <div class="col-6 col-md-3">
+            <label for="thang" class="form-label">Tháng</label>
+            <select id="thang" name="thang" class="form-select">
+                @for (var month = 1; month <= 12; month++) { <option value="@month" selected="@((int)ViewBag.Thang == month ? "selected" : null)">Tháng @month</option> }
+            </select>
+        </div>
+        <div class="col-6 col-md-3"><label for="nam" class="form-label">Năm</label><input id="nam" name="nam" type="number" min="2000" max="@(DateTime.Today.Year + 1)" value="@ViewBag.Nam" class="form-control" /></div>
+        <div class="col-12 col-md-6 filter-actions"><button type="submit" class="btn btn-primary">Xem báo cáo</button><button type="button" class="btn btn-outline-secondary" data-print-page>In báo cáo</button></div>
+    </div>
+</form>
+
+<div class="print-report-header text-center mb-4">
+    <p class="small fw-bold text-uppercase mb-1">@ViewBag.HotelName</p>
+    @if (!string.IsNullOrWhiteSpace(Convert.ToString(ViewBag.HotelAddress))) { <p class="small text-muted mb-2">@ViewBag.HotelAddress</p> }
+    <h2 class="h4 mb-1">Báo cáo doanh thu tháng @ViewBag.Thang/@ViewBag.Nam</h2>
+    <p class="small text-muted mb-0">Ngày in: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
+</div>
+
+<section class="stats-grid mb-4" aria-label="Tổng hợp báo cáo">
+    <article class="surface-card stat-card success"><div class="stat-card-top"><div><div class="stat-label">Tổng doanh thu</div><div class="stat-value fs-3">@totalRevenue.ToString("N0") đ</div></div><span class="stat-icon" aria-hidden="true">₫</span></div></article>
+    <article class="surface-card stat-card info"><div class="stat-card-top"><div><div class="stat-label">Hóa đơn đã thanh toán</div><div class="stat-value">@totalInvoices</div></div><span class="stat-icon" aria-hidden="true">▤</span></div></article>
+    <article class="surface-card stat-card"><div class="stat-card-top"><div><div class="stat-label">Ngày có doanh thu</div><div class="stat-value">@rows.Count</div></div><span class="stat-icon" aria-hidden="true">▦</span></div></article>
+</section>
+
+<div class="surface-card data-card">
+    @if (rows.Any())
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th scope="col">Ngày</th><th scope="col" class="text-end">Số hóa đơn</th><th scope="col" class="text-end">Doanh thu</th></tr></thead>
+                <tbody>@foreach (var row in rows) { <tr><td>@row.Ngay/@ViewBag.Thang/@ViewBag.Nam</td><td class="text-end">@row.SoLuongDon</td><td class="text-end currency fw-semibold">@row.DoanhThu.ToString("N0") đ</td></tr> }</tbody>
+                <tfoot><tr><th>Tổng cộng</th><th class="text-end">@totalInvoices</th><th class="text-end currency text-success fs-6">@totalRevenue.ToString("N0") đ</th></tr></tfoot>
+            </table>
+        </div>
+    }
+    else
+    {
+        @await Html.PartialAsync("_EmptyState", new EmptyStateViewModel { Title = "Không có dữ liệu doanh thu", Message = "Chưa có hóa đơn đã thanh toán trong tháng đã chọn.", Icon = "↗" })
+    }
+</div>

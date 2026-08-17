@@ -1,0 +1,49 @@
+﻿@model QLKS.Models.CustomerAmenitiesViewModel
+@{
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    ViewBag.Title = "Tiện ích và dịch vụ";
+}
+<header class="resort-page-intro">
+    <div class="resort-container text-center">
+        <span class="resort-kicker">Dịch vụ tại khách sạn</span>
+        <h1>Trải nghiệm hoàn hảo</h1>
+        <p>Những khoảng lặng tinh tế, ẩm thực chỉn chu và tiện nghi giúp mỗi ngày lưu trú trở nên trọn vẹn.</p>
+    </div>
+</header>
+<section class="resort-section resort-container resort-editorial-stack" aria-label="Không gian tiện ích">
+    <article class="resort-editorial-row">
+        <img src="@Url.Content("~/Content/Customer/images/services/amenity-dining.jpg")" alt="Không gian nhà hàng" />
+        <div><span class="resort-kicker">Ẩm thực</span><h2>Không gian ẩm thực tinh tế</h2><p>Khởi đầu ngày mới nhẹ nhàng hoặc tận hưởng bữa tối trong không gian được chăm chút đến từng chi tiết.</p></div>
+    </article>
+    <article class="resort-editorial-row reverse">
+        <img src="@Url.Content("~/Content/Customer/images/services/amenity-bar.jpg")" alt="Không gian thư giãn bên biển" loading="lazy" />
+        <div><span class="resort-kicker">Thư giãn</span><h2>Nhịp nghỉ dưỡng bên biển</h2><p>Một khoảng không thoáng đãng để thư giãn, trò chuyện và tận hưởng những phút giây riêng tư.</p></div>
+    </article>
+    <article class="resort-editorial-feature">
+        <div><span class="resort-kicker">Đón ánh bình minh</span><h2>Hồ bơi vô cực ngắm nhìn đại dương</h2></div>
+        <img src="@Url.Content("~/Content/Customer/images/services/amenity-pool.jpg")" alt="Hồ bơi vô cực" loading="lazy" />
+    </article>
+</section>
+<section class="resort-section resort-service-section" aria-labelledby="serviceListTitle">
+    <div class="resort-container">
+        <div class="resort-section-heading"><div><span class="resort-kicker">Dữ liệu hiện hành</span><h2 id="serviceListTitle">Dịch vụ đang cung cấp</h2></div></div>
+        @if (Model.Services != null && Model.Services.Any())
+        {
+            <div class="resort-service-grid">
+                @foreach (var service in Model.Services)
+                {
+                    <article>
+                        <span class="resort-service-icon" aria-hidden="true">✦</span>
+                        <h3>@service.TenDV</h3>
+                        <p>@(string.IsNullOrWhiteSpace(service.MoTa) ? "Dịch vụ được phục vụ theo nhu cầu trong thời gian lưu trú." : service.MoTa)</p>
+                        <strong>@(service.DonGia > 0 ? service.DonGia.ToString("N0") + " đ" : "Liên hệ lễ tân")</strong>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            @await Html.PartialAsync("_EmptyState", new QLKS.Models.EmptyStateViewModel { Title = "Chưa có dịch vụ", Message = "Dữ liệu dịch vụ chưa được cập nhật trong hệ thống.", Icon = "✦" })
+        }
+    </div>
+</section>

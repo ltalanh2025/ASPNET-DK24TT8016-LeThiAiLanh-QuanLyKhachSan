@@ -1,0 +1,23 @@
+@{
+    var hotelName = AppConfig.Get("HotelName", "Khách sạn");
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b6b0e" />
+    <title>@ViewBag.Title - @hotelName</title>
+    @Styles.Render("~/Content/css")
+    @Styles.Render("~/Content/Customer/css")
+</head>
+<body class="customer-auth-site">
+    <a class="skip-link" href="#mainContent">Đến biểu mẫu</a>
+    <main id="mainContent" tabindex="-1">@RenderBody()</main>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/site")
+    @Scripts.Render("~/bundles/customer-js")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,92 @@
+﻿@model QLKS.Models.CustomerHomeViewModel
+@using QLKS.Services
+@{
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    ViewBag.Title = "Nghỉ dưỡng và đặt phòng trực tuyến";
+}
+<section class="resort-hero">
+    <div class="resort-hero-shade"></div>
+    <div class="resort-hero-content">
+        <span class="resort-kicker light">Kỳ nghỉ được thiết kế dành riêng cho bạn</span>
+        <h1>Nơi sự sang trọng gặp gỡ sự bình yên</h1>
+        <p>Khám phá không gian nghỉ dưỡng tinh tế và hoàn tất hành trình đặt phòng chỉ trong vài phút.</p>
+        <div class="resort-booking-widget">
+            @using (Html.BeginForm("AvailableRooms", "OnlineBooking", FormMethod.Get, new { role = "search", @class = "resort-booking-form", data_booking_search = "" }))
+            {
+                <div class="resort-field">
+                    <label for="homeCheckIn">Nhận phòng</label>
+                    <input class="form-control" id="homeCheckIn" name="NgayNhanPhong" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" value="@Model.Search.NgayNhanPhong.Value.ToString("yyyy-MM-dd")" data-check-in required />
+                </div>
+                <div class="resort-field">
+                    <label for="homeCheckOut">Trả phòng</label>
+                    <input class="form-control" id="homeCheckOut" name="NgayTraPhong" type="date" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" value="@Model.Search.NgayTraPhong.Value.ToString("yyyy-MM-dd")" data-check-out required />
+                </div>
+                <div class="resort-field">
+                    <label for="homeGuests">Số khách</label>
+                    <input class="form-control" id="homeGuests" name="SoNguoi" type="number" min="1" max="50" value="@Model.Search.SoNguoi" required />
+                </div>
+                <button class="btn resort-btn-primary" type="submit">Kiểm tra phòng</button>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="resort-section resort-container customer-introduction" aria-labelledby="hotelIntroductionTitle">
+    <div>
+        <span class="resort-kicker">Một kỳ nghỉ thật riêng</span>
+        <h2 id="hotelIntroductionTitle">Không gian thanh lịch, trải nghiệm được kết nối</h2>
+        <p>Từ lúc tìm phòng đến khi theo dõi đơn và thanh toán cọc, mọi bước đều được thiết kế rõ ràng. Dữ liệu phòng, sức chứa và giá được đọc trực tiếp từ hệ thống khách sạn.</p>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+            <a class="btn resort-btn-primary" href="@Url.Action("Search", "OnlineBooking")">Đặt phòng</a>
+            <a class="btn resort-btn-outline" href="@Url.Action("Services", "CustomerHome")">Xem dịch vụ</a>
+        </div>
+    </div>
+    <img src="@Url.Content("~/Content/Customer/images/hero/contact-hero.jpg")" alt="Không gian tổng thể của khu nghỉ dưỡng" loading="lazy" />
+</section>
+
+<section class="resort-section resort-container" aria-labelledby="featuredRoomsTitle">
+    <div class="resort-section-heading">
+        <div><span class="resort-kicker">Phòng nghỉ</span><h2 id="featuredRoomsTitle">Không gian dành cho những ngày thật chậm</h2></div>
+        <a class="resort-text-link" href="@Url.Action("Search", "OnlineBooking")">Tìm phòng theo ngày <span aria-hidden="true">→</span></a>
+    </div>
+    @if (Model.FeaturedRooms != null && Model.FeaturedRooms.Any())
+    {
+        <div class="resort-preview-grid">
+            @foreach (var room in Model.FeaturedRooms)
+            {
+                var image = string.IsNullOrWhiteSpace(room.AnhDaiDien) ? ImageUploadService.DefaultImage : room.AnhDaiDien;
+                <article class="resort-preview-card">
+                    <img src="@Url.Content("~/Content/Images/" + image)" data-image-fallback="@Url.Content("~/Content/Images/" + ImageUploadService.DefaultImage)" alt="Phòng @room.SoPhong - @room.TenLoai" loading="lazy" />
+                    <div>
+                        <span class="resort-kicker">@room.TenLoai</span>
+                        <h3>Phòng @room.SoPhong</h3>
+                        <p>@(string.IsNullOrWhiteSpace(room.MoTa) ? "Không gian lưu trú tiện nghi, phù hợp cho kỳ nghỉ thư thái." : room.MoTa)</p>
+                        <div class="resort-preview-meta"><span>Tối đa @room.SoNguoiToiDa khách</span><strong>Từ @room.GiaMoiDem.ToString("N0") đ/đêm</strong></div>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+    else
+    {
+        @await Html.PartialAsync("_EmptyState", new QLKS.Models.EmptyStateViewModel { Title = "Chưa có phòng để giới thiệu", Message = "Danh sách sẽ được cập nhật từ dữ liệu phòng của khách sạn.", Icon = "◇", ActionUrl = Url.Action("Search", "OnlineBooking"), ActionText = "Kiểm tra phòng" })
+    }
+</section>
+
+<section class="resort-experience-band">
+    <div class="resort-container resort-experience-grid">
+        <div class="resort-experience-image"><img src="@Url.Content("~/Content/Customer/images/services/amenity-pool.jpg")" alt="Hồ bơi hướng biển" loading="lazy" /></div>
+        <div class="resort-experience-copy">
+            <span class="resort-kicker">Trải nghiệm trọn vẹn</span>
+            <h2>Từng khoảnh khắc đều đáng nhớ</h2>
+            <p>Từ không gian ẩm thực đến dịch vụ thư giãn, mọi trải nghiệm được kết nối trong cùng một hành trình nghỉ dưỡng.</p>
+            @if (Model.FeaturedServices != null && Model.FeaturedServices.Any())
+            {
+                <ul class="resort-service-list">
+                    @foreach (var service in Model.FeaturedServices) { <li>@service.TenDV</li> }
+                </ul>
+            }
+            <a class="btn resort-btn-outline" href="@Url.Action("Services", "CustomerHome")">Khám phá tiện ích</a>
+        </div>
+    </div>
+</section>

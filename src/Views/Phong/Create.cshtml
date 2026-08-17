@@ -1,0 +1,27 @@
+﻿@model QLKS.Models.RoomCreateViewModel
+@using QLKS.Models
+@{ ViewBag.Title = "Thêm phòng"; var fieldData = new ViewDataDictionary<object>(ViewData) { { "RoomTypes", ViewBag.MaLoai } }; }
+@await Html.PartialAsync("_PageHeader", new PageHeaderViewModel { Title = "Thêm phòng mới", Subtitle = "Thiết lập thông tin cơ bản và ảnh đại diện cho phòng.", Icon = "+" })
+<div class="form-shell">
+    @using (Html.BeginForm("Create", "Phong", FormMethod.Post, new { enctype = "multipart/form-data", @class = "surface-card p-3 p-md-4" }))
+    {
+        @Html.AntiForgeryToken()
+        @await Html.PartialAsync("_ValidationSummary")
+        <section class="form-section" aria-labelledby="roomInfoTitle">
+            <h2 class="form-section-title" id="roomInfoTitle">Thông tin phòng</h2>
+            @await Html.PartialAsync("_RoomFormFields", Model, fieldData)
+        </section>
+        <section class="form-section border-top pt-3" aria-labelledby="roomImageTitle">
+            <h2 class="form-section-title" id="roomImageTitle">Ảnh đại diện</h2>
+            <label for="HinhAnh" class="form-label">Chọn ảnh phòng</label>
+            <input id="HinhAnh" name="HinhAnh" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+            @Html.ValidationMessage("HinhAnh", new { @class = "text-danger" })
+            <p class="form-help mt-2 mb-0">Định dạng JPG, PNG hoặc WEBP; dung lượng tối đa 5 MB.</p>
+        </section>
+        <div class="form-actions">
+            <a href="@Url.Action("Index")" class="btn btn-outline-secondary">Hủy</a>
+            <button type="submit" class="btn btn-primary" data-loading-text="Đang lưu phòng...">Lưu phòng</button>
+        </div>
+    }
+</div>
+@section Scripts { @Scripts.Render("~/bundles/jqueryval") }

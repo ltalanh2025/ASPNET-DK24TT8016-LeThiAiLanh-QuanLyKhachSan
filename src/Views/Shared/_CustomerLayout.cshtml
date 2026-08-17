@@ -1,0 +1,140 @@
+@using QLKS.Models
+@{
+    var hotelName = AppConfig.Get("HotelName", "Khách sạn");
+    var customerLoggedIn = Session[CustomerSessionKeys.CustomerId] is int;
+    var customerName = Convert.ToString(Session[CustomerSessionKeys.CustomerName]);
+    var controller = Convert.ToString(ViewContext.RouteData.Values["controller"]);
+    var action = Convert.ToString(ViewContext.RouteData.Values["action"]);
+    Func<string, string, string> active = (c, a) => controller.Equals(c, StringComparison.OrdinalIgnoreCase) &&
+        (string.IsNullOrEmpty(a) || action.Equals(a, StringComparison.OrdinalIgnoreCase)) ? "active" : string.Empty;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b6b0e" />
+    <title>@ViewBag.Title - @hotelName</title>
+    @Styles.Render("~/Content/css")
+    @Styles.Render("~/Content/Customer/css")
+</head>
+<body class="customer-site resort-site">
+    <a class="skip-link" href="#mainContent">Bỏ qua menu, đến nội dung chính</a>
+    <nav class="navbar navbar-expand-xl resort-navbar sticky-top" aria-label="Điều hướng khách hàng">
+        <div class="container-fluid resort-container">
+            <a class="navbar-brand resort-brand" href="@Url.Action("Index", "CustomerHome")">@hotelName</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#customerNav" aria-controls="customerNav" aria-expanded="false" aria-label="Mở menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="customerNav">
+                <ul class="navbar-nav mx-auto align-items-xl-center">
+                    <li class="nav-item"><a class="nav-link @active("CustomerHome", "Index")" href="@Url.Action("Index", "CustomerHome")">Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link @active("OnlineBooking", "")" href="@Url.Action("Search", "OnlineBooking")">Phòng nghỉ</a></li>
+                    <li class="nav-item"><a class="nav-link @active("CustomerHome", "Services")" href="@Url.Action("Services", "CustomerHome")">Tiện ích &amp; dịch vụ</a></li>
+                    <li class="nav-item"><a class="nav-link @active("CustomerHome", "Contact")" href="@Url.Action("Contact", "CustomerHome")">Liên hệ</a></li>
+                    @if (customerLoggedIn)
+                    {
+                        <li class="nav-item"><a class="nav-link @active("OnlineBooking", "MyBookings")" href="@Url.Action("MyBookings", "OnlineBooking")">Đơn của tôi</a></li>
+                    }
+                </ul>
+                <div class="resort-nav-actions">
+                    @if (customerLoggedIn)
+                    {
+                        <div class="dropdown">
+                            <button class="btn resort-account-menu dropdown-toggle" type="button" id="customerAccountMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="customer-avatar" aria-hidden="true">@(!string.IsNullOrWhiteSpace(customerName) ? customerName.Substring(0, 1).ToUpperInvariant() : "K")</span>
+                                <span>@customerName</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end customer-account-dropdown" aria-labelledby="customerAccountMenu">
+                                <li><a class="dropdown-item" href="@Url.Action("MyBookings", "OnlineBooking")">Đơn đặt phòng của tôi</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("Profile", "CustomerAccount")">Thông tin cá nhân</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("ChangePassword", "CustomerAccount")">Đổi mật khẩu</a></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    @using (Html.BeginForm("Logout", "CustomerAccount", FormMethod.Post, new { @class = "customer-logout-form" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <button class="dropdown-item" type="submit">Đăng xuất</button>
+                                    }
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <a class="resort-account-link" href="@Url.Action("Login", "CustomerAccount")">Đăng nhập</a>
+                        <a class="resort-account-link" href="@Url.Action("Register", "CustomerAccount")">Đăng ký</a>
+                    }
+                    <a class="btn resort-btn-primary" href="@Url.Action("Search", "OnlineBooking")">Đặt phòng ngay</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <main class="customer-main" id="mainContent" tabindex="-1">
+        <div class="container resort-alerts">@await Html.PartialAsync("_AlertMessages")</div>
+        @RenderBody()
+    </main>
+    <footer class="resort-footer">
+        <div class="resort-container resort-footer-grid">
+            <div>
+                <a class="resort-footer-brand" href="@Url.Action("Index", "CustomerHome")">
+                    <span class="resort-footer-brand-badge" aria-hidden="true">★</span>
+                    <span>@hotelName</span>
+                </a>
+                <p>Hệ thống Quản lý Khách sạn &amp; Đặt phòng Trực tuyến — Đồ án chuyên đề ASP.NET Core 8 MVC, kết nối SQL Server qua Entity Framework.</p>
+                <p class="small text-white-50 mb-0"><strong>Địa chỉ:</strong> @(AppConfig.Get("HotelAddress", "Đại học Trà Vinh — CNTT"))</p>
+                <div class="resort-footer-social">
+                    <a href="https://facebook.com" class="social-icon" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook">f</a>
+                    <a href="https://youtube.com" class="social-icon" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">▶</a>
+                    <a href="mailto:@(AppConfig.Get("HotelEmail", "contact@qlkshotel.vn"))" class="social-icon" aria-label="Email" title="Email">✉</a>
+                </div>
+            </div>
+            <div>
+                <h2>Khám phá</h2>
+                <a href="@Url.Action("Search", "OnlineBooking")">Phòng nghỉ</a>
+                <a href="@Url.Action("Services", "CustomerHome")">Tiện ích &amp; dịch vụ</a>
+                <a href="@Url.Action("Contact", "CustomerHome")">Liên hệ &amp; hỗ trợ</a>
+                <a href="@Url.Action("Login", "Account")">Cổng quản trị nội bộ</a>
+            </div>
+            <div>
+                <h2>Khách hàng</h2>
+                @if (customerLoggedIn)
+                {
+                    <a href="@Url.Action("MyBookings", "OnlineBooking")">Đơn đặt của tôi</a>
+                    <a href="@Url.Action("Profile", "CustomerAccount")">Thông tin cá nhân</a>
+                    <a href="@Url.Action("ChangePassword", "CustomerAccount")">Đổi mật khẩu</a>
+                }
+                else
+                {
+                    <a href="@Url.Action("Login", "CustomerAccount")">Đăng nhập tài khoản</a>
+                    <a href="@Url.Action("Register", "CustomerAccount")">Đăng ký thành viên</a>
+                }
+                <a href="@Url.Action("Search", "OnlineBooking")">Chính sách đặt cọc 20%</a>
+            </div>
+            <div>
+                <h2>Thông tin đồ án</h2>
+                <ul class="resort-footer-project-info">
+                    <li><strong>Trường:</strong> Đại học Trà Vinh — CNTT</li>
+                    <li><strong>Lớp:</strong> DK24TT8016</li>
+                    <li><strong>GVHD:</strong> TS. Đoàn Phước Miền</li>
+                    <li>
+                        <strong>Sinh viên thực hiện:</strong>
+                        <span class="resort-footer-student-item">Lê Thị Ái Lanh — <em>170124184</em></span>
+                        <span class="resort-footer-student-item">Nguyễn Văn Thủy — <em>170124292</em></span>
+                    </li>
+                    <li><strong>Năm học:</strong> 2026</li>
+                </ul>
+            </div>
+        </div>
+        <div class="resort-footer-bottom">
+            &copy; @DateTime.Now.Year @hotelName — Đồ án chuyên đề ASP.NET Core 8 MVC · Phát triển bởi Lê Thị Ái Lanh &amp; Nguyễn Văn Thủy (DK24TT8016 — ĐH Trà Vinh).
+        </div>
+    </footer>
+    @await Html.PartialAsync("_ConfirmModal")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/site")
+    @Scripts.Render("~/bundles/customer-js")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

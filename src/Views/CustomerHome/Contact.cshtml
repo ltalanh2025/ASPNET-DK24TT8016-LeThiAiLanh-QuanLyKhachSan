@@ -1,0 +1,61 @@
+@model QLKS.Models.CustomerContactPageViewModel
+@{
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    ViewBag.Title = "Liên hệ";
+    var hasAddress = !string.IsNullOrWhiteSpace(Model.Address) && !Model.Address.StartsWith("Cập nhật", System.StringComparison.OrdinalIgnoreCase);
+    var requestTypes = new[] { "Tư vấn đặt phòng", "Sự kiện hoặc tiệc", "Dịch vụ trong kỳ lưu trú", "Yêu cầu khác" };
+}
+<section class="resort-contact-hero">
+    <img src="@Url.Content("~/Content/Customer/images/hero/contact-hero.jpg")" alt="Toàn cảnh khu nghỉ dưỡng ven biển" />
+    <div class="resort-contact-hero-copy"><span class="resort-kicker">Kết nối cùng chúng tôi</span><h1>Khám phá @Model.HotelName</h1><p>Mỗi hành trình đáng nhớ bắt đầu từ một lựa chọn phù hợp.</p></div>
+</section>
+
+<section class="resort-section resort-container resort-contact-grid">
+    <div>
+        <span class="resort-kicker">Thông tin khách sạn</span>
+        <h2>Liên hệ với chúng tôi</h2>
+        <p>Đội ngũ của chúng tôi sẵn sàng hỗ trợ bạn kiểm tra phòng trống và giải đáp thông tin trước kỳ lưu trú.</p>
+        <dl class="resort-contact-list">
+            <div><dt>Địa chỉ</dt><dd>@(hasAddress ? Model.Address : "Đang cập nhật trong cấu hình hệ thống")</dd></div>
+            <div><dt>Điện thoại</dt><dd>@if (!string.IsNullOrWhiteSpace(Model.Phone)) { <a href="tel:@Model.Phone">@Model.Phone</a> } else { <span>Đang cập nhật</span> }</dd></div>
+            <div><dt>Email</dt><dd>@if (!string.IsNullOrWhiteSpace(Model.Email)) { <a href="mailto:@Model.Email">@Model.Email</a> } else { <span>Đang cập nhật</span> }</dd></div>
+            <div><dt>Thời gian làm việc</dt><dd>@(string.IsNullOrWhiteSpace(Model.WorkingHours) ? "Đang cập nhật" : Model.WorkingHours)</dd></div>
+        </dl>
+        <div class="customer-map-area" role="img" aria-label="Khu vực bản đồ vị trí khách sạn">
+            <span class="customer-map-pin" aria-hidden="true">⌖</span>
+            <div><strong>Khu vực bản đồ</strong><p>@(hasAddress ? Model.Address : "Cần cấu hình địa chỉ khách sạn để hiển thị vị trí chính xác.")</p></div>
+        </div>
+    </div>
+
+    <aside class="resort-contact-card customer-contact-form-card">
+        <span class="resort-kicker">Gửi yêu cầu</span>
+        <h2>Chúng tôi có thể hỗ trợ gì?</h2>
+        <p class="small">Form đang chạy ở chế độ demo vì database hiện chưa có bảng liên hệ. Nội dung hợp lệ sẽ không được lưu hoặc gửi ra hệ thống ngoài.</p>
+        @await Html.PartialAsync("_ValidationSummary")
+        @using (Html.BeginForm("Contact", "CustomerHome", FormMethod.Post, new { @class = "customer-contact-form" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="customer-contact-form-grid">
+                <div class="resort-auth-field">@Html.LabelFor(x => x.Form.TenNguoiGui)@Html.TextBoxFor(x => x.Form.TenNguoiGui, new { @class = "form-control", autocomplete = "name", placeholder = "Ví dụ: Nguyễn Văn A" })@Html.ValidationMessageFor(x => x.Form.TenNguoiGui, "", new { @class = "text-danger small" })</div>
+                <div class="resort-auth-field">@Html.LabelFor(x => x.Form.Email)@Html.TextBoxFor(x => x.Form.Email, new { @class = "form-control", type = "email", autocomplete = "email", placeholder = "vidu@gmail.com" })@Html.ValidationMessageFor(x => x.Form.Email, "", new { @class = "text-danger small" })</div>
+                <div class="resort-auth-field full">@Html.LabelFor(x => x.Form.LoaiYeuCau)@Html.DropDownListFor(x => x.Form.LoaiYeuCau, new SelectList(requestTypes, Model.Form.LoaiYeuCau), "Chọn loại yêu cầu", new { @class = "form-select" })@Html.ValidationMessageFor(x => x.Form.LoaiYeuCau, "", new { @class = "text-danger small" })</div>
+                <div class="resort-auth-field full">@Html.LabelFor(x => x.Form.NoiDung)@Html.TextAreaFor(x => x.Form.NoiDung, 5, 40, new { @class = "form-control", placeholder = "Vui lòng nhập nội dung liên hệ hoặc thắc mắc của bạn (10–1000 ký tự)..." })@Html.ValidationMessageFor(x => x.Form.NoiDung, "", new { @class = "text-danger small" })</div>
+            </div>
+            <button class="btn resort-btn-primary w-100 mt-4" type="submit" data-loading-text="Đang kiểm tra...">Gửi thông điệp</button>
+        }
+    </aside>
+</section>
+
+<section class="resort-section resort-explore-section">
+    <div class="resort-container">
+        <div class="resort-section-heading centered"><div><span class="resort-kicker">Điểm đến</span><h2>Khám phá vùng đất</h2></div></div>
+        <div class="resort-explore-grid">
+            <article class="wide"><img src="@Url.Content("~/Content/Customer/images/services/explore-tower.jpg")" alt="Tháp Bà Ponagar" loading="lazy" /><div><span>Văn hóa &amp; lịch sử</span><h3>Tháp Bà Ponagar</h3></div></article>
+            <article><img src="@Url.Content("~/Content/Customer/images/services/explore-island.jpg")" alt="Đảo Hòn Mun" loading="lazy" /><div><span>Thiên nhiên</span><h3>Đảo Hòn Mun</h3></div></article>
+            <article><img src="@Url.Content("~/Content/Customer/images/services/explore-market.jpg")" alt="Chợ đêm Nha Trang" loading="lazy" /><div><span>Trải nghiệm</span><h3>Chợ đêm Nha Trang</h3></div></article>
+            <article class="wide"><img src="@Url.Content("~/Content/Customer/images/services/explore-waterfall.jpg")" alt="Suối Ba Hồ" loading="lazy" /><div><span>Khám phá</span><h3>Suối Ba Hồ</h3></div></article>
+        </div>
+    </div>
+</section>
+
+@section scripts { @Scripts.Render("~/bundles/jqueryval") }

@@ -1,0 +1,77 @@
+@model QLKS.Models.OnlineBookingCreateViewModel
+@using QLKS.Services
+@{
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    ViewBag.Title = "Xác nhận đặt phòng";
+    var room = Model.Room;
+    var customer = Model.Customer;
+    var image = room == null || string.IsNullOrWhiteSpace(room.AnhDaiDien) ? ImageUploadService.DefaultImage : room.AnhDaiDien;
+    var remaining = room == null ? 0 : room.TongTienDuKien - room.TienCoc;
+}
+<div class="resort-page-shell">
+    <div class="booking-two-column customer-booking-confirmation">
+        <section class="surface-card">
+            <div class="customer-booking-room-image"><img src="@Url.Content("~/Content/Images/" + image)" data-image-fallback="@Url.Content("~/Content/Images/" + ImageUploadService.DefaultImage)" alt="@(room == null ? "Ảnh phòng" : "Ảnh phòng " + room.SoPhong + " - " + room.TenLoai)" /></div>
+            <div class="card-body p-4 p-lg-5">
+                <span class="eyebrow">Bước 1/2</span>
+                <h1 class="h3 mt-2">Xác nhận thông tin đặt phòng</h1>
+                <p class="text-muted">Hệ thống sẽ đọc lại giá, sức chứa và lịch phòng ngay khi bạn xác nhận.</p>
+                @await Html.PartialAsync("_ValidationSummary")
+                @using (Html.BeginForm("Create", "OnlineBooking", FormMethod.Post, new { data_confirm = "", data_confirm_title = "Tạo đơn giữ chỗ", data_confirm_message = "Tạo đơn và giữ phòng trong 15 phút để thanh toán cọc?", data_confirm_button = "Tiếp tục thanh toán", data_confirm_class = "btn-primary" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(x => x.MaPhong)
+                    @Html.HiddenFor(x => x.NgayNhanPhong)
+                    @Html.HiddenFor(x => x.NgayTraPhong)
+                    @Html.HiddenFor(x => x.SoNguoi)
+
+                    <h2 class="h5 mt-4">Thông tin lưu trú</h2>
+                    <dl class="booking-summary-list">
+                        <div><dt>Phòng</dt><dd>@(room == null ? "—" : "Phòng " + room.SoPhong + " · " + room.TenLoai)</dd></div>
+                        <div><dt>Ngày nhận</dt><dd>@(Model.NgayNhanPhong.HasValue ? Model.NgayNhanPhong.Value.ToString("dd/MM/yyyy") : "—")</dd></div>
+                        <div><dt>Ngày trả</dt><dd>@(Model.NgayTraPhong.HasValue ? Model.NgayTraPhong.Value.ToString("dd/MM/yyyy") : "—")</dd></div>
+                        <div><dt>Số đêm</dt><dd>@(room == null ? 0 : room.SoDem) đêm</dd></div>
+                        <div><dt>Số khách</dt><dd>@(Model.SoNguoi.HasValue ? Model.SoNguoi.Value.ToString() : "—") người</dd></div>
+                        <div><dt>Giá mỗi đêm</dt><dd>@(room == null ? "—" : room.GiaMoiDem.ToString("N0") + " VNĐ")</dd></div>
+                    </dl>
+
+                    <h2 class="h5 mt-4">Thông tin khách hàng</h2>
+                    <dl class="booking-summary-list">
+                        <div><dt>Họ tên</dt><dd>@(customer == null ? "—" : customer.TenKH)</dd></div>
+                        <div><dt>Email</dt><dd>@(customer == null ? "—" : customer.Email)</dd></div>
+                        <div><dt>Số điện thoại</dt><dd>@(customer == null || string.IsNullOrWhiteSpace(customer.DienThoai) ? "Chưa cập nhật" : customer.DienThoai)</dd></div>
+                    </dl>
+
+                    <div class="mt-4">@Html.LabelFor(x => x.GhiChu, new { @class = "form-label" })@Html.TextAreaFor(x => x.GhiChu, 3, 20, new { @class = "form-control", placeholder = "Ví dụ: Cần phòng yên tĩnh, tầng cao, chuẩn bị giường phụ... (không bắt buộc)" })@Html.ValidationMessageFor(x => x.GhiChu, "", new { @class = "text-danger small" })</div>
+
+                    <div class="customer-booking-policies mt-4">
+                        <h2 class="h5">Chính sách đặt và hủy phòng</h2>
+                        <ul>
+                            <li>Đơn được giữ trong thời hạn thanh toán do hệ thống hiển thị ở bước tiếp theo.</li>
+                            <li>Tiền cọc bằng 20% tổng tiền dự kiến; số tiền còn lại được xử lý theo nghiệp vụ khách sạn.</li>
+                            <li>Việc hủy chỉ khả dụng ở các trạng thái backend đang cho phép. Đơn đã cọc có thể chuyển sang chờ hoàn cọc.</li>
+                        </ul>
+                        <div class="form-check mt-3">@Html.CheckBoxFor(x => x.XacNhanChinhSach, new { @class = "form-check-input", required = "required", data_val = "true", data_val_required = "Bạn cần xác nhận chính sách đặt phòng." })@Html.LabelFor(x => x.XacNhanChinhSach, new { @class = "form-check-label" })</div>
+                        @Html.ValidationMessageFor(x => x.XacNhanChinhSach, "", new { @class = "text-danger small d-block" })
+                    </div>
+
+                    <div class="form-actions"><a class="btn btn-outline-secondary" href="@Url.Action("Search")">Chọn lại</a><button type="submit" class="btn resort-btn-primary" data-loading-text="Đang giữ phòng...">Tiếp tục thanh toán</button></div>
+                }
+            </div>
+        </section>
+        <aside class="surface-card booking-cost-card">
+            <div class="card-body p-4">
+                <h2 class="h5">Chi phí dự kiến</h2>
+                @if (room != null)
+                {
+                    <div class="cost-line"><span>@room.GiaMoiDem.ToString("N0") VNĐ × @room.SoDem đêm</span><strong>@room.TongTienDuKien.ToString("N0") VNĐ</strong></div>
+                    <div class="cost-total"><span>Tổng dự kiến</span><strong>@room.TongTienDuKien.ToString("N0") VNĐ</strong></div>
+                    <div class="deposit-highlight"><span>Cọc cần thanh toán (20%)</span><strong>@room.TienCoc.ToString("N0") VNĐ</strong></div>
+                    <div class="cost-line"><span>Còn lại dự kiến</span><strong>@remaining.ToString("N0") VNĐ</strong></div>
+                }
+                <p class="small text-muted mt-3 mb-0">Các con số chỉ để hiển thị. Server sẽ đọc lại đơn giá từ database, tính số đêm, tổng tiền và cọc 20% khi nhận POST.</p>
+            </div>
+        </aside>
+    </div>
+</div>
+@section scripts { @Scripts.Render("~/bundles/jqueryval") }

@@ -1,0 +1,32 @@
+﻿@using QLKS.Models
+@{
+    var currentController = Convert.ToString(ViewContext.RouteData.Values["controller"]);
+    var currentAction = Convert.ToString(ViewContext.RouteData.Values["action"]);
+    var role = Convert.ToString(Session[SessionKeys.RoleName]);
+    var homeController = role == RoleNames.Housekeeping ? "TapVu" : "Home";
+    var homeLabel = role == RoleNames.Housekeeping ? "Công việc" : "Tổng quan";
+    var controllerNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        { "Home", "Tổng quan" }, { "Phong", "Phòng" }, { "HoaDon", "Hóa đơn" },
+        { "KhachHangs", "Khách hàng" }, { "NhanVien", "Nhân viên" },
+        { "TapVu", "Dọn phòng" }, { "Admin", "Quản trị" }, { "Account", "Tài khoản" }
+    };
+    var sectionName = controllerNames.ContainsKey(currentController) ? controllerNames[currentController] : currentController;
+    var isHome = currentController.Equals(homeController, StringComparison.OrdinalIgnoreCase) && currentAction.Equals("Index", StringComparison.OrdinalIgnoreCase);
+}
+@if (ViewBag.SuppressBreadcrumb != true)
+{
+    <nav class="app-breadcrumb no-print" aria-label="Đường dẫn trang">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", homeController)">@homeLabel</a></li>
+            @if (!isHome)
+            {
+                if (!currentAction.Equals("Index", StringComparison.OrdinalIgnoreCase))
+                {
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", currentController)">@sectionName</a></li>
+                }
+                <li class="breadcrumb-item active" aria-current="page">@ViewBag.Title</li>
+            }
+        </ol>
+    </nav>
+}

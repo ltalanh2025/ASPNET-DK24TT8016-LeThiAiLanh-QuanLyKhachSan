@@ -1,0 +1,41 @@
+@model QLKS.Models.CustomerRegisterViewModel
+@{
+    Layout = "~/Views/Shared/_CustomerAuthLayout.cshtml";
+    ViewBag.Title = "Đăng ký khách hàng";
+    var hotelName = AppConfig.Get("HotelName", "Khách sạn");
+}
+<div class="resort-auth-shell register">
+    <section class="resort-auth-visual register" aria-label="Giới thiệu khách sạn">
+        <div class="resort-auth-visual-shade"></div>
+        <a class="resort-auth-brand" href="@Url.Action("Index", "CustomerHome")">@hotelName</a>
+        <div><h1>@hotelName</h1><p>Khám phá chốn bình yên nơi thiên nhiên giao hòa cùng trải nghiệm nghỉ dưỡng chỉn chu.</p></div>
+    </section>
+    <section class="resort-auth-panel">
+        <div class="resort-auth-card register-card">
+            @await Html.PartialAsync("_AlertMessages")
+            <span class="resort-kicker">Thành viên mới</span><h1>Tạo tài khoản khách hàng</h1><p>Thông tin này được dùng để xác nhận và quản lý đơn đặt phòng của bạn.</p>
+            @await Html.PartialAsync("_ValidationSummary")
+            @using (Html.BeginForm("Register", "CustomerAccount", new { returnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "resort-auth-form" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="resort-auth-form-grid">
+                    <div class="resort-auth-field">@Html.LabelFor(x => x.TenKH)@Html.TextBoxFor(x => x.TenKH, new { @class = "form-control", autocomplete = "name", placeholder = "Ví dụ: Nguyễn Văn A" })@Html.ValidationMessageFor(x => x.TenKH, "", new { @class = "text-danger small" })</div>
+                    <div class="resort-auth-field">@Html.LabelFor(x => x.Email)@Html.TextBoxFor(x => x.Email, new { @class = "form-control", type = "email", autocomplete = "email", placeholder = "vidu@gmail.com" })@Html.ValidationMessageFor(x => x.Email, "", new { @class = "text-danger small" })</div>
+                    <div class="resort-auth-field">@Html.LabelFor(x => x.DienThoai)@Html.TextBoxFor(x => x.DienThoai, new { @class = "form-control", inputmode = "tel", autocomplete = "tel", placeholder = "Ví dụ: 0901234567" })@Html.ValidationMessageFor(x => x.DienThoai, "", new { @class = "text-danger small" })</div>
+                    <div class="resort-auth-field">@Html.LabelFor(x => x.CCCD)@Html.TextBoxFor(x => x.CCCD, new { @class = "form-control", inputmode = "numeric", placeholder = "Nhập 9 hoặc 12 số (không bắt buộc)" })@Html.ValidationMessageFor(x => x.CCCD, "", new { @class = "text-danger small" })</div>
+                    <div class="resort-auth-field full">@Html.LabelFor(x => x.DiaChi)@Html.TextBoxFor(x => x.DiaChi, new { @class = "form-control", autocomplete = "street-address", placeholder = "Ví dụ: 123 Lê Lợi, Quận 1, TP.HCM (không bắt buộc)" })@Html.ValidationMessageFor(x => x.DiaChi, "", new { @class = "text-danger small" })</div>
+                    <div class="resort-auth-field">@Html.LabelFor(x => x.MatKhau)<div class="password-field">@Html.PasswordFor(x => x.MatKhau, new { @class = "form-control", autocomplete = "new-password", placeholder = "Tối thiểu 8 ký tự" })<button type="button" class="btn btn-sm btn-link password-toggle" data-password-toggle="MatKhau" aria-label="Hiện mật khẩu" aria-pressed="false">Hiện</button></div>@Html.ValidationMessageFor(x => x.MatKhau, "", new { @class = "text-danger small" })</div>
+                    <div class="resort-auth-field">@Html.LabelFor(x => x.XacNhanMatKhau)<div class="password-field">@Html.PasswordFor(x => x.XacNhanMatKhau, new { @class = "form-control", autocomplete = "new-password", placeholder = "Nhập lại mật khẩu" })<button type="button" class="btn btn-sm btn-link password-toggle" data-password-toggle="XacNhanMatKhau" aria-label="Hiện mật khẩu xác nhận" aria-pressed="false">Hiện</button></div>@Html.ValidationMessageFor(x => x.XacNhanMatKhau, "", new { @class = "text-danger small" })</div>
+                    <div class="resort-auth-field full customer-terms-field">
+                        <div class="form-check">@Html.CheckBoxFor(x => x.DongYDieuKhoan, new { @class = "form-check-input", required = "required", data_val = "true", data_val_required = "Bạn cần đồng ý với điều khoản sử dụng." })@Html.LabelFor(x => x.DongYDieuKhoan, new { @class = "form-check-label" })</div>
+                        @Html.ValidationMessageFor(x => x.DongYDieuKhoan, "", new { @class = "text-danger small d-block" })
+                    </div>
+                </div>
+                <button type="submit" class="btn resort-btn-primary w-100" data-loading-text="Đang tạo tài khoản...">Đăng ký <span aria-hidden="true">→</span></button>
+            }
+            <p class="resort-auth-switch">Đã có tài khoản? <a href="@Url.Action("Login", new { returnUrl = ViewBag.ReturnUrl })">Đăng nhập ngay</a></p>
+            <a class="resort-auth-back" href="@Url.Action("Index", "CustomerHome")"><span aria-hidden="true">←</span> Trở về trang chủ</a>
+        </div>
+    </section>
+</div>
+@section scripts { @Scripts.Render("~/bundles/jqueryval") }

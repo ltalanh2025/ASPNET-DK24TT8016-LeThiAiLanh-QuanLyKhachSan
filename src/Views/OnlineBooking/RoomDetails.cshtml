@@ -1,0 +1,37 @@
+﻿@model QLKS.Models.RoomDetailsPageViewModel
+@using QLKS.Services
+@{
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    ViewBag.Title = "Chi tiết phòng " + Model.Room.SoPhong;
+    var room = Model.Room;
+    var image = string.IsNullOrWhiteSpace(room.AnhDaiDien) ? ImageUploadService.DefaultImage : room.AnhDaiDien;
+}
+<div class="resort-page-shell">
+    <div class="customer-room-detail">
+        <section class="customer-room-detail-image">
+            <img src="@Url.Content("~/Content/Images/" + image)" data-image-fallback="@Url.Content("~/Content/Images/" + ImageUploadService.DefaultImage)" alt="Ảnh phòng @room.SoPhong - @room.TenLoai" />
+        </section>
+        <section class="surface-card">
+            <div class="card-body p-4 p-lg-5">
+                <span class="customer-availability-badge">Còn trống trong khoảng đã chọn</span>
+                <span class="resort-kicker d-block mt-3">@room.TenLoai · Tầng @room.Tang</span>
+                <h1 class="mt-2">Phòng @room.SoPhong</h1>
+                <p class="text-muted">@(string.IsNullOrWhiteSpace(room.MoTa) ? "Mô tả chi tiết đang được cập nhật." : room.MoTa)</p>
+                <dl class="booking-summary-list mt-4">
+                    <div><dt>Ngày nhận</dt><dd>@Model.Search.NgayNhanPhong.Value.ToString("dd/MM/yyyy")</dd></div>
+                    <div><dt>Ngày trả</dt><dd>@Model.Search.NgayTraPhong.Value.ToString("dd/MM/yyyy")</dd></div>
+                    <div><dt>Số đêm</dt><dd>@room.SoDem đêm</dd></div>
+                    <div><dt>Sức chứa</dt><dd>Tối đa @room.SoNguoiToiDa khách</dd></div>
+                    <div><dt>Tiện nghi</dt><dd>Theo mô tả và tiêu chuẩn loại phòng @room.TenLoai</dd></div>
+                    <div><dt>Giá mỗi đêm</dt><dd>@room.GiaMoiDem.ToString("N0") VNĐ</dd></div>
+                </dl>
+                <div class="deposit-highlight mt-4"><span>Tổng dự kiến · cọc 20%</span><strong>@room.TongTienDuKien.ToString("N0") VNĐ · @room.TienCoc.ToString("N0") VNĐ</strong></div>
+                <div class="form-actions">
+                    <a class="btn btn-outline-secondary" href="@Url.Action("AvailableRooms", new { ngayNhanPhong = Model.Search.NgayNhanPhong.Value.ToString("yyyy-MM-dd"), ngayTraPhong = Model.Search.NgayTraPhong.Value.ToString("yyyy-MM-dd"), soNguoi = Model.Search.SoNguoi })">Quay lại danh sách</a>
+                    <a class="btn resort-btn-primary" href="@Url.Action("Create", new { maPhong = room.MaPhong, ngayNhanPhong = Model.Search.NgayNhanPhong.Value.ToString("yyyy-MM-dd"), ngayTraPhong = Model.Search.NgayTraPhong.Value.ToString("yyyy-MM-dd"), soNguoi = Model.Search.SoNguoi })">Đặt phòng này</a>
+                </div>
+                <p class="small text-muted mt-3 mb-0">Giá và khả năng còn phòng sẽ được server đọc lại từ cơ sở dữ liệu khi tạo đơn.</p>
+            </div>
+        </section>
+    </div>
+</div>

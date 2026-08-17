@@ -1,0 +1,60 @@
+﻿@model QLKS.Models.CustomerServicesViewModel
+@{
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    ViewBag.Title = "Dịch vụ và tiện ích";
+}
+<header class="resort-page-intro">
+    <div class="resort-container text-center">
+        <span class="resort-kicker">Dịch vụ tại khách sạn</span>
+        <h1>Trải nghiệm hoàn hảo</h1>
+        <p>Những khoảng lặng tinh tế, ẩm thực chỉn chu và tiện nghi giúp mỗi ngày lưu trú trở nên trọn vẹn.</p>
+    </div>
+</header>
+
+<section class="resort-section resort-container resort-editorial-stack" aria-label="Không gian tiện ích nổi bật">
+    <article class="resort-editorial-row">
+        <img src="@Url.Content("~/Content/Customer/images/services/amenity-dining.jpg")" alt="Không gian nhà hàng" />
+        <div><span class="resort-kicker">Ẩm thực</span><h2>Không gian ẩm thực tinh tế</h2><p>Khởi đầu ngày mới nhẹ nhàng hoặc tận hưởng bữa tối trong không gian được chăm chút đến từng chi tiết.</p></div>
+    </article>
+    <article class="resort-editorial-row reverse">
+        <img src="@Url.Content("~/Content/Customer/images/services/amenity-bar.jpg")" alt="Không gian thư giãn bên biển" loading="lazy" />
+        <div><span class="resort-kicker">Thư giãn</span><h2>Nhịp nghỉ dưỡng bên biển</h2><p>Một khoảng không thoáng đãng để thư giãn, trò chuyện và tận hưởng những phút giây riêng tư.</p></div>
+    </article>
+    <article class="resort-editorial-feature">
+        <div><span class="resort-kicker">Đón ánh bình minh</span><h2>Hồ bơi vô cực ngắm nhìn đại dương</h2></div>
+        <img src="@Url.Content("~/Content/Customer/images/services/amenity-pool.jpg")" alt="Hồ bơi vô cực" loading="lazy" />
+    </article>
+</section>
+
+<section class="resort-section resort-service-section" aria-labelledby="serviceListTitle">
+    <div class="resort-container">
+        <div class="resort-section-heading">
+            <div><span class="resort-kicker">Dữ liệu từ DichVu</span><h2 id="serviceListTitle">Dịch vụ trong danh mục hiện hành</h2></div>
+        </div>
+        <div class="alert alert-info customer-service-note" role="note">
+            Danh sách và giá dưới đây lấy từ cơ sở dữ liệu để giới thiệu trên website. Phí thực tế chỉ được ghi vào hóa đơn khi nhân viên thêm dịch vụ theo nghiệp vụ hiện có. Cấu trúc <strong>DichVu</strong> hiện chưa có cột ảnh hoặc trạng thái hoạt động; ảnh là minh họa cục bộ và badge chỉ xác nhận bản ghi đang có trong danh mục.
+        </div>
+        @if (Model.Services != null && Model.Services.Any())
+        {
+            <div class="customer-service-catalog">
+                @foreach (var service in Model.Services)
+                {
+                    <article class="customer-service-card">
+                        <img src="@Url.Content(service.AnhMinhHoa)" alt="Ảnh minh họa cho dịch vụ @service.TenDV" loading="lazy" />
+                        <div>
+                            <span class="customer-availability-badge">@service.TrangThaiHienThi</span>
+                            <h3>@service.TenDV</h3>
+                            <p>@(string.IsNullOrWhiteSpace(service.MoTa) ? "Mô tả dịch vụ đang được cập nhật trong hệ thống." : service.MoTa)</p>
+                            <strong>@(service.DonGia > 0 ? service.DonGia.ToString("N0") + " VNĐ" : "Liên hệ lễ tân")</strong>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            @await Html.PartialAsync("_EmptyState", new QLKS.Models.EmptyStateViewModel { Title = "Chưa có dịch vụ", Message = "Dữ liệu dịch vụ chưa được cập nhật trong hệ thống.", Icon = "✦" })
+        }
+    </div>
+</section>
+

@@ -1,0 +1,22 @@
+﻿@using QLKS.Models
+@{
+    var statusCode = Context.Response.StatusCode >= 400 ? Context.Response.StatusCode : 500;
+    Context.Response.StatusCode = statusCode;
+    var role = Convert.ToString(Session[SessionKeys.RoleName]);
+    var homeController = role == RoleNames.Housekeeping ? "TapVu" : "Home";
+    var homeLabel = role == RoleNames.Housekeeping ? "Về công việc" : "Về Dashboard";
+    var title = statusCode == 403 ? "Bạn không có quyền truy cập" : statusCode == 404 ? "Không tìm thấy nội dung" : "Không thể xử lý yêu cầu";
+    var message = statusCode == 403 ? "Tài khoản hiện tại không được phép sử dụng chức năng này." : statusCode == 404 ? "Trang hoặc dữ liệu bạn tìm kiếm không tồn tại, hoặc đã được thay đổi." : "Hệ thống gặp sự cố tạm thời. Vui lòng thử lại sau hoặc liên hệ quản trị viên.";
+    ViewBag.Title = "Lỗi " + statusCode;
+    ViewBag.SuppressBreadcrumb = true;
+}
+<section class="surface-card empty-state error-card mx-auto" aria-labelledby="errorTitle">
+    <span class="empty-state-icon" aria-hidden="true">!</span>
+    <p class="text-uppercase small fw-bold text-danger mb-2">Mã lỗi @statusCode</p>
+    <h1 class="h3" id="errorTitle">@title</h1>
+    <p>@message</p>
+    <div class="d-flex flex-wrap justify-content-center gap-2 no-print">
+        <button type="button" class="btn btn-outline-secondary" data-history-back data-history-fallback="@Url.Action("Index", homeController)">Quay lại</button>
+        <a href="@Url.Action("Index", homeController)" class="btn btn-primary">@homeLabel</a>
+    </div>
+</section>

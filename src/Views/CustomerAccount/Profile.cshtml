@@ -1,0 +1,25 @@
+﻿@model QLKS.Models.CustomerProfileViewModel
+@{ Layout = "~/Views/Shared/_CustomerLayout.cshtml"; ViewBag.Title = "Thông tin cá nhân"; }
+<div class="resort-page-shell">
+<div class="customer-form-card surface-card"><div class="card-body p-4 p-md-5">
+    <div class="d-flex flex-column flex-sm-row justify-content-between gap-3 mb-4"><div><span class="eyebrow">Tài khoản</span><h1 class="h3 mt-2 mb-1">Thông tin cá nhân</h1><p class="text-muted mb-0">Cập nhật thông tin dùng cho các đơn đặt phòng.</p></div><a class="btn btn-outline-primary align-self-sm-start" href="@Url.Action("ChangePassword")">Đổi mật khẩu</a></div>
+    <dl class="customer-account-meta">
+        <div><dt>Ngày tạo tài khoản</dt><dd>@(Model.NgayTaoTaiKhoan.HasValue ? Model.NgayTaoTaiKhoan.Value.ToString("dd/MM/yyyy HH:mm") : "Chưa có trường dữ liệu trong database hiện tại")</dd></div>
+        <div><dt>Trạng thái tài khoản</dt><dd><span class="customer-availability-badge">@Model.TrangThaiTaiKhoan</span></dd></div>
+    </dl>
+    @await Html.PartialAsync("_ValidationSummary")
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        <div class="row g-3">
+            <div class="col-md-6">@Html.LabelFor(x => x.TenKH, new { @class = "form-label" })@Html.TextBoxFor(x => x.TenKH, new { @class = "form-control", autocomplete = "name" })@Html.ValidationMessageFor(x => x.TenKH, "", new { @class = "text-danger small" })</div>
+            <div class="col-md-6">@Html.LabelFor(x => x.Email, new { @class = "form-label" })@Html.TextBoxFor(x => x.Email, new { @class = "form-control", type = "email", autocomplete = "email" })@Html.ValidationMessageFor(x => x.Email, "", new { @class = "text-danger small" })</div>
+            <div class="col-md-6">@Html.LabelFor(x => x.DienThoai, new { @class = "form-label" })@Html.TextBoxFor(x => x.DienThoai, new { @class = "form-control", autocomplete = "tel" })@Html.ValidationMessageFor(x => x.DienThoai, "", new { @class = "text-danger small" })</div>
+            <div class="col-md-6">@Html.LabelFor(x => x.CCCD, new { @class = "form-label" })@Html.TextBoxFor(x => x.CCCD, new { @class = "form-control", inputmode = "numeric" })@Html.ValidationMessageFor(x => x.CCCD, "", new { @class = "text-danger small" })</div>
+            <div class="col-12">@Html.LabelFor(x => x.DiaChi, new { @class = "form-label" })@Html.TextBoxFor(x => x.DiaChi, new { @class = "form-control", autocomplete = "street-address" })@Html.ValidationMessageFor(x => x.DiaChi, "", new { @class = "text-danger small" })</div>
+        </div>
+        <div class="form-actions"><a class="btn btn-outline-secondary" href="@Url.Action("MyBookings", "OnlineBooking")">Đơn của tôi</a><button class="btn btn-primary" type="submit">Lưu thay đổi</button></div>
+    }
+</div></div>
+</div>
+@section scripts { @Scripts.Render("~/bundles/jqueryval") }

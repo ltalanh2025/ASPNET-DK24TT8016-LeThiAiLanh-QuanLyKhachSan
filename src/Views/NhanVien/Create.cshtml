@@ -1,0 +1,31 @@
+@model QLKS.Models.EmployeeCreateViewModel
+@using QLKS.Models
+@{ ViewBag.Title = "Thêm nhân viên"; }
+@await Html.PartialAsync("_PageHeader", new PageHeaderViewModel { Title = "Thêm nhân viên", Subtitle = "Tạo tài khoản mới và phân quyền truy cập phù hợp.", Icon = "+" })
+<div class="form-shell">
+    @using (Html.BeginForm("Create", "NhanVien", FormMethod.Post, new { @class = "surface-card p-3 p-md-4", autocomplete = "off" }))
+    {
+        @Html.AntiForgeryToken()
+        @await Html.PartialAsync("_ValidationSummary")
+        <section class="form-section" aria-labelledby="employeeAccountTitle">
+            <h2 class="form-section-title" id="employeeAccountTitle">Thông tin tài khoản</h2>
+            <div class="row g-3">
+                <div class="col-md-6">@Html.LabelFor(x => x.TenDangNhap, new { @class = "form-label field-required" }) @Html.TextBoxFor(x => x.TenDangNhap, new { @class = "form-control", maxlength = "50", autocomplete = "off", placeholder = "Ví dụ: letan_nam (chữ và số không dấu)" }) @Html.ValidationMessageFor(x => x.TenDangNhap, "", new { @class = "text-danger" })</div>
+                <div class="col-md-6">@Html.LabelFor(x => x.VaiTro, new { @class = "form-label field-required" }) @Html.DropDownListFor(x => x.VaiTro, (SelectList)ViewBag.VaiTro, "-- Chọn vai trò --", new { @class = "form-select" }) @Html.ValidationMessageFor(x => x.VaiTro, "", new { @class = "text-danger" })</div>
+                <div class="col-md-6">@Html.LabelFor(x => x.MatKhau, new { @class = "form-label field-required" })<div class="password-field">@Html.PasswordFor(x => x.MatKhau, new { @class = "form-control", autocomplete = "new-password", placeholder = "Tối thiểu 8 ký tự" })<button type="button" class="btn btn-link password-toggle" data-password-toggle="MatKhau" aria-label="Hiện mật khẩu">Hiện</button></div>@Html.ValidationMessageFor(x => x.MatKhau, "", new { @class = "text-danger" })</div>
+                <div class="col-md-6">@Html.LabelFor(x => x.XacNhanMatKhau, new { @class = "form-label field-required" })<div class="password-field">@Html.PasswordFor(x => x.XacNhanMatKhau, new { @class = "form-control", autocomplete = "new-password", placeholder = "Nhập lại mật khẩu đã nhập ở trên" })<button type="button" class="btn btn-link password-toggle" data-password-toggle="XacNhanMatKhau" aria-label="Hiện mật khẩu xác nhận">Hiện</button></div>@Html.ValidationMessageFor(x => x.XacNhanMatKhau, "", new { @class = "text-danger" })</div>
+            </div>
+        </section>
+        <section class="form-section border-top pt-3" aria-labelledby="employeeProfileTitle">
+            <h2 class="form-section-title" id="employeeProfileTitle">Thông tin nhân viên</h2>
+            <div class="row g-3">
+                <div class="col-md-6">@Html.LabelFor(x => x.TenNV, new { @class = "form-label field-required" }) @Html.TextBoxFor(x => x.TenNV, new { @class = "form-control", maxlength = "100", autocomplete = "name", placeholder = "Ví dụ: Trần Văn Nam" }) @Html.ValidationMessageFor(x => x.TenNV, "", new { @class = "text-danger" })</div>
+                <div class="col-md-6">@Html.LabelFor(x => x.GioiTinh, new { @class = "form-label" }) @Html.DropDownListFor(x => x.GioiTinh, new[] { new SelectListItem { Text = "Nam", Value = "Nam" }, new SelectListItem { Text = "Nữ", Value = "Nữ" }, new SelectListItem { Text = "Khác", Value = "Khác" } }, "-- Chọn giới tính --", new { @class = "form-select" })</div>
+                <div class="col-md-6">@Html.LabelFor(x => x.NgaySinh, new { @class = "form-label" }) @Html.TextBoxFor(x => x.NgaySinh, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" }) @Html.ValidationMessageFor(x => x.NgaySinh, "", new { @class = "text-danger" })</div>
+                <div class="col-md-6">@Html.LabelFor(x => x.SDT, new { @class = "form-label" }) @Html.TextBoxFor(x => x.SDT, new { @class = "form-control", type = "tel", inputmode = "tel", autocomplete = "tel", placeholder = "Ví dụ: 0901234567" }) @Html.ValidationMessageFor(x => x.SDT, "", new { @class = "text-danger" })</div>
+            </div>
+        </section>
+        <div class="form-actions"><a href="@Url.Action("Index")" class="btn btn-outline-secondary">Hủy</a><button type="submit" class="btn btn-primary" data-loading-text="Đang tạo tài khoản...">Tạo nhân viên</button></div>
+    }
+</div>
+@section Scripts { @Scripts.Render("~/bundles/jqueryval") }

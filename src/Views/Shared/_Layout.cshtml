@@ -1,0 +1,135 @@
+@using QLKS.Models
+@{
+    var controller = Convert.ToString(ViewContext.RouteData.Values["controller"]);
+    var action = Convert.ToString(ViewContext.RouteData.Values["action"]);
+    var loggedIn = Session[SessionKeys.UserId] is int;
+    var role = Convert.ToString(Session[SessionKeys.RoleName]);
+    var displayName = Convert.ToString(Session[SessionKeys.DisplayName]);
+    var hotelName = AppConfig.Get("HotelName", "Quản lý khách sạn");
+    var homeController = role == RoleNames.Housekeeping ? "TapVu" : "Home";
+    var roleDisplay = role == RoleNames.Admin ? "Quản trị viên" : role == RoleNames.Receptionist ? "Lễ tân" : role == RoleNames.Housekeeping ? "Tạp vụ" : role;
+    Func<string, string> activeController = value => controller.Equals(value, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty;
+    Func<string, string, string> activeAction = (controllerName, actionName) => controller.Equals(controllerName, StringComparison.OrdinalIgnoreCase) && action.Equals(actionName, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0f172a" />
+    <title>@ViewBag.Title - @hotelName</title>
+    @Styles.Render("~/Content/css")
+</head>
+<body>
+    <a class="skip-link" href="#mainContent">Bỏ qua menu, đến nội dung chính</a>
+    @if (loggedIn)
+    {
+        <div class="app-shell">
+            <aside class="app-sidebar" id="appSidebar" aria-label="Điều hướng chính">
+                <a class="sidebar-brand" href="@Url.Action("Index", homeController)">
+                    <span class="brand-mark" aria-hidden="true">◆</span>
+                    <span class="brand-text">@hotelName<span class="brand-caption">Hệ thống quản lý</span></span>
+                </a>
+                <button type="button" class="btn btn-link text-white position-absolute top-0 end-0 mt-3 me-2 d-lg-none" id="sidebarClose" aria-label="Đóng menu">×</button>
+                <div class="sidebar-scroll">
+                    @if (role != RoleNames.Housekeeping)
+                    {
+                        <div class="nav-section">Tổng quan</div>
+                        <nav class="nav nav-pills flex-column sidebar-nav">
+                            <a class="nav-link @activeController("Home")" href="@Url.Action("Index", "Home")"><span class="ui-icon" aria-hidden="true">⌂</span><span>Dashboard</span></a>
+                        </nav>
+                    }
+
+                    <div class="nav-section">Nghiệp vụ</div>
+                    <nav class="nav nav-pills flex-column sidebar-nav">
+                        <a class="nav-link @activeController("Phong")" href="@Url.Action("Index", "Phong")"><span class="ui-icon" aria-hidden="true">▦</span><span>Sơ đồ phòng</span></a>
+                        @if (role == RoleNames.Admin || role == RoleNames.Receptionist)
+                        {
+                            <a class="nav-link @activeController("KhachHangs")" href="@Url.Action("Index", "KhachHangs")"><span class="ui-icon" aria-hidden="true">♙</span><span>Khách hàng</span></a>
+                            <a class="nav-link @activeController("OnlineBookingAdmin")" href="@Url.Action("Index", "OnlineBookingAdmin")"><span class="ui-icon" aria-hidden="true">◫</span><span>Đơn online</span></a>
+                            <a class="nav-link @activeController("HoaDon")" href="@Url.Action("Index", "HoaDon")"><span class="ui-icon" aria-hidden="true">▤</span><span>Hóa đơn</span></a>
+                        }
+                        @if (role == RoleNames.Admin || role == RoleNames.Housekeeping)
+                        {
+                            <a class="nav-link @activeController("TapVu")" href="@Url.Action("Index", "TapVu")"><span class="ui-icon" aria-hidden="true">✓</span><span>Dọn phòng</span></a>
+                        }
+                    </nav>
+
+                    @if (role == RoleNames.Admin)
+                    {
+                        <div class="nav-section">Quản trị</div>
+                        <nav class="nav nav-pills flex-column sidebar-nav">
+                            <a class="nav-link @activeController("NhanVien")" href="@Url.Action("Index", "NhanVien")"><span class="ui-icon" aria-hidden="true">♟</span><span>Nhân viên</span></a>
+                            <a class="nav-link @activeAction("Admin", "BaoCao")" href="@Url.Action("BaoCao", "Admin")"><span class="ui-icon" aria-hidden="true">↗</span><span>Báo cáo doanh thu</span></a>
+                            <a class="nav-link @activeAction("Admin", "Log")" href="@Url.Action("Log", "Admin")"><span class="ui-icon" aria-hidden="true">≡</span><span>Nhật ký hệ thống</span></a>
+                        </nav>
+                    }
+                </div>
+                <div class="sidebar-account">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="brand-mark sidebar-avatar" aria-hidden="true">@(!string.IsNullOrWhiteSpace(displayName) ? displayName.Substring(0, 1).ToUpperInvariant() : "U")</span>
+                        <div class="sidebar-user flex-grow-1">
+                            <div class="sidebar-user-name">@displayName</div>
+                            <div class="sidebar-user-role">@roleDisplay</div>
+                        </div>
+                        <a class="btn btn-sm btn-outline-light" href="@Url.Action("ChangePassword", "Account")" aria-label="Đổi mật khẩu" title="Đổi mật khẩu">⚙</a>
+                    </div>
+                </div>
+            </aside>
+            <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
+            <div class="app-main">
+                <header class="app-topbar">
+                    <div class="d-flex align-items-center gap-2 min-w-0">
+                        <button class="btn btn-outline-secondary sidebar-toggle" type="button" id="sidebarToggle" aria-controls="appSidebar" aria-expanded="false" aria-label="Mở menu">☰</button>
+                        <div class="topbar-heading">
+                            <p class="topbar-title">@ViewBag.Title</p>
+                            <span class="topbar-date">@DateTime.Now.ToString("dddd, dd/MM/yyyy", new System.Globalization.CultureInfo("vi-VN"))</span>
+                        </div>
+                    </div>
+                    <div class="topbar-actions">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="topbar-user-label">@displayName</span>
+                                <span class="badge text-bg-light ms-1">@roleDisplay</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li><a class="dropdown-item" href="@Url.Action("ChangePassword", "Account")">Đổi mật khẩu</a></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li class="px-2">
+                                    @using (Html.BeginForm("Logout", "Account", FormMethod.Post))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="dropdown-item text-danger">Đăng xuất</button>
+                                    }
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </header>
+
+                <main class="app-content" id="mainContent" tabindex="-1">
+                    @await Html.PartialAsync("_Breadcrumb")
+                    @await Html.PartialAsync("_AlertMessages")
+                    <div class="content-surface">
+                        @RenderBody()
+                    </div>
+                </main>
+                <footer class="app-footer no-print">&copy; @DateTime.Now.Year @hotelName · Đồ án ASP.NET Core 8 MVC · ĐH Trà Vinh — CNTT (Lớp DK24TT8016)</footer>
+            </div>
+        </div>
+        @await Html.PartialAsync("_ConfirmModal")
+    }
+    else
+    {
+        <main id="mainContent" class="container py-5" tabindex="-1">
+            @await Html.PartialAsync("_AlertMessages")
+            @RenderBody()
+        </main>
+    }
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/site")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

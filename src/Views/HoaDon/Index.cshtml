@@ -1,0 +1,104 @@
+@model QLKS.Models.InvoiceIndexViewModel
+@using QLKS.Models
+@using Microsoft.AspNetCore.Routing
+@{ ViewBag.Title = "Hóa đơn"; }
+@await Html.PartialAsync("_PageHeader", new PageHeaderViewModel { Title = "Quản lý hóa đơn", Subtitle = "Theo dõi lưu trú, thanh toán và tra cứu lịch sử hóa đơn.", Icon = "▤", ActionUrl = Url.Action("Create"), ActionText = "Nhận phòng mới", ActionIcon = "+" })
+
+@await Html.PartialAsync("_ValidationSummary")
+<form method="get" action="@Url.Action("Index")" class="surface-card filter-card no-print" role="search">
+    <div class="row g-2 align-items-end">
+        <div class="col-sm-6 col-lg-2"><label for="maHoaDon" class="form-label">Mã hóa đơn</label><input id="maHoaDon" name="maHoaDon" value="@Model.InvoiceCode" class="form-control" inputmode="numeric" placeholder="Ví dụ: 102" /></div>
+        <div class="col-sm-6 col-lg-3"><label for="khachHang" class="form-label">Khách hàng</label><input id="khachHang" name="khachHang" value="@Model.Customer" class="form-control" placeholder="Nhập tên khách hàng..." /></div>
+        <div class="col-sm-6 col-lg-2">
+            <label for="trangThai" class="form-label">Trạng thái</label>
+            <select id="trangThai" name="trangThai" class="form-select">
+                <option value="">Tất cả</option>
+                <option value="@((int)InvoiceStatus.Reserved)" selected="@(Model.Status == (int)InvoiceStatus.Reserved ? "selected" : null)">Đang đặt</option>
+                <option value="@((int)InvoiceStatus.CheckedIn)" selected="@(Model.Status == (int)InvoiceStatus.CheckedIn ? "selected" : null)">Đang ở</option>
+                <option value="@((int)InvoiceStatus.Paid)" selected="@(Model.Status == (int)InvoiceStatus.Paid ? "selected" : null)">Đã thanh toán</option>
+            </select>
+        </div>
+        <div class="col-6 col-lg-2"><label for="tuNgay" class="form-label">Từ ngày</label><input id="tuNgay" name="tuNgay" type="date" value="@(Model.FromDate.HasValue ? Model.FromDate.Value.ToString("yyyy-MM-dd") : "")" class="form-control" /></div>
+        <div class="col-6 col-lg-2"><label for="denNgay" class="form-label">Đến ngày</label><input id="denNgay" name="denNgay" type="date" value="@(Model.ToDate.HasValue ? Model.ToDate.Value.ToString("yyyy-MM-dd") : "")" class="form-control" /></div>
+        <div class="col-12 col-lg-1 filter-actions"><button type="submit" class="btn btn-primary">Lọc</button><a href="@Url.Action("Index")" class="btn btn-outline-secondary" aria-label="Xóa bộ lọc">Xóa</a></div>
+    </div>
+</form>
+
+<div class="surface-card data-card">
+    @if (Model.Results.Items != null && Model.Results.Items.Any())
+    {
+        <div class="d-flex justify-content-between align-items-center p-3 border-bottom"><span class="result-summary">Hiển thị @Model.Results.Items.Count / @Model.Results.TotalItems hóa đơn</span></div>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th scope="col">Mã</th><th scope="col">Khách hàng</th><th scope="col">Phòng</th><th scope="col">Check-in</th><th scope="col">Check-out</th><th scope="col" class="text-end">Tổng tiền</th><th scope="col" class="text-center">Trạng thái</th><th scope="col" class="text-end">Thao tác</th></tr></thead>
+                <tbody>
+                @foreach (var item in Model.Results.Items)
+                {
+                    var roomDetail = item.ChiTietHoaDons == null ? null : item.ChiTietHoaDons.FirstOrDefault();
+                    var roomNumber = roomDetail == null || roomDetail.Phong == null ? "—" : roomDetail.Phong.SoPhong;
+                    var days = Math.Max(1, (int)Math.Ceiling(((item.NgayCheckOut ?? DateTime.Now) - (item.NgayCheckIn ?? DateTime.Now)).TotalDays));
+                    var roomTotal = roomDetail == null ? 0m : days * (roomDetail.DonGiaThucTe ?? 0m);
+                    var serviceTotal = item.ChiTietDichVus == null ? 0m : item.ChiTietDichVus.Sum(x => (x.SoLuong ?? 0) * (x.DonGia ?? 0m));
+                    var currentTotal = item.DaThanhToan == true ? (item.TongTien ?? roomTotal + serviceTotal) : roomTotal + serviceTotal;
+                    var depositReceived = Math.Min(currentTotal, Math.Max(0m, item.TienCocDaNhan));
+                    var remainingTotal = Math.Max(0m, currentTotal - depositReceived);
+                    var statusText = item.TinhTrang == (int)InvoiceStatus.Paid ? "Đã thanh toán" : item.TinhTrang == (int)InvoiceStatus.CheckedIn ? "Đang ở" : "Đang đặt";
+                    var statusClass = item.TinhTrang == (int)InvoiceStatus.Paid ? "status-paid" : item.TinhTrang == (int)InvoiceStatus.CheckedIn ? "status-occupied" : "status-reserved";
+                    <tr>
+                        <td><a class="fw-bold text-decoration-none" href="@Url.Action("Details", new { id = item.MaHD })">#@item.MaHD</a></td>
+                        <td><div class="fw-semibold">@(item.KhachHang == null || string.IsNullOrWhiteSpace(item.KhachHang.TenKH) ? "Chưa có tên" : item.KhachHang.TenKH)</div></td>
+                        <td>Phòng @roomNumber</td>
+                        <td class="nowrap">@(item.NgayCheckIn.HasValue ? item.NgayCheckIn.Value.ToString("dd/MM/yyyy HH:mm") : "—")</td>
+                        <td class="nowrap">@(item.NgayCheckOut.HasValue ? item.NgayCheckOut.Value.ToString("dd/MM/yyyy HH:mm") : "—")</td>
+                        <td class="text-end"><div class="currency fw-semibold">@currentTotal.ToString("N0") đ</div>@if (depositReceived > 0) { <small class="text-success">Còn thu @remainingTotal.ToString("N0") đ</small> }</td>
+                        <td class="text-center">@await Html.PartialAsync("_StatusBadge", new StatusBadgeViewModel { Text = statusText, CssClass = statusClass, Icon = item.TinhTrang == (int)InvoiceStatus.Paid ? "✓" : item.TinhTrang == (int)InvoiceStatus.CheckedIn ? "●" : "◷" })</td>
+                        <td class="text-end table-actions no-print">
+                            <a href="@Url.Action("Details", new { id = item.MaHD })" class="btn btn-sm btn-outline-primary">Chi tiết</a>
+                            @if (item.DaThanhToan != true && item.TinhTrang == (int)InvoiceStatus.CheckedIn)
+                            {
+                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#checkoutModal-@item.MaHD">Checkout</button>
+                                <div class="modal fade text-start" id="checkoutModal-@item.MaHD" tabindex="-1" aria-labelledby="checkoutTitle-@item.MaHD" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+                                    @using (Html.BeginForm("Checkout", "HoaDon", new { id = item.MaHD }, FormMethod.Post, new { }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <div class="modal-header"><h2 class="modal-title fs-5" id="checkoutTitle-@item.MaHD">Xác nhận thanh toán hóa đơn #@item.MaHD</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+                                        <div class="modal-body">
+                                            <dl class="row mb-0">
+                                                <dt class="col-5 text-muted">Khách hàng</dt><dd class="col-7 fw-semibold">@(item.KhachHang == null ? "—" : item.KhachHang.TenKH)</dd>
+                                                <dt class="col-5 text-muted">Phòng</dt><dd class="col-7">@roomNumber</dd>
+                                                <dt class="col-5 text-muted">Số ngày ở</dt><dd class="col-7">@days ngày</dd>
+                                                <dt class="col-5 text-muted">Tiền phòng</dt><dd class="col-7 currency">@roomTotal.ToString("N0") đ</dd>
+                                                <dt class="col-5 text-muted">Tiền dịch vụ</dt><dd class="col-7 currency">@serviceTotal.ToString("N0") đ</dd>
+                                                <dt class="col-5 text-muted">Tổng chi phí</dt><dd class="col-7 currency">@currentTotal.ToString("N0") đ</dd>
+                                                <dt class="col-5 text-success">Cọc đã nhận</dt><dd class="col-7 text-success currency">- @depositReceived.ToString("N0") đ</dd>
+                                                <dt class="col-5 pt-2 border-top">Còn phải thu</dt><dd class="col-7 pt-2 border-top invoice-total text-danger currency">@remainingTotal.ToString("N0") đ</dd>
+                                            </dl>
+                                            <p class="small text-muted mb-0 mt-3">Sau thanh toán, phòng sẽ chuyển sang trạng thái Đang dọn.</p>
+                                        </div>
+                                        <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button><button type="submit" class="btn btn-danger" data-loading-text="Đang thanh toán...">Xác nhận thanh toán</button></div>
+                                    }
+                                    </div></div>
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        @await Html.PartialAsync("_Pagination", new PaginationViewModel
+        {
+            CurrentPage = Model.Results.CurrentPage,
+            TotalPages = Model.Results.TotalPages,
+            TotalItems = Model.Results.TotalItems,
+            Action = "Index",
+            Controller = "HoaDon",
+            RouteValues = new RouteValueDictionary(new { maHoaDon = Model.InvoiceCode, khachHang = Model.Customer, trangThai = Model.Status, tuNgay = Model.FromDate.HasValue ? Model.FromDate.Value.ToString("yyyy-MM-dd") : null, denNgay = Model.ToDate.HasValue ? Model.ToDate.Value.ToString("yyyy-MM-dd") : null })
+        })
+    }
+    else
+    {
+        @await Html.PartialAsync("_EmptyState", new EmptyStateViewModel { Title = "Không tìm thấy hóa đơn", Message = "Hãy thay đổi bộ lọc hoặc tạo phiếu nhận phòng mới.", Icon = "▤", ActionUrl = Url.Action("Create"), ActionText = "Nhận phòng mới" })
+    }
+</div>

@@ -1,0 +1,38 @@
+@model QLKS.Models.CustomerViewModelBase
+<div class="row g-3">
+    <div class="col-md-6">
+        @Html.LabelFor(x => x.TenKH, new { @class = "form-label field-required" })
+        @Html.TextBoxFor(x => x.TenKH, new { @class = "form-control", maxlength = "100", placeholder = "Ví dụ: Nguyễn Văn A", autocomplete = "name" })
+        @Html.ValidationMessageFor(x => x.TenKH, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-md-6">
+        @Html.LabelFor(x => x.CCCD, new { @class = "form-label" })
+        @Html.TextBoxFor(x => x.CCCD, new { @class = "form-control", maxlength = "12", inputmode = "numeric", pattern = "[0-9]*", placeholder = "Nhập 9 hoặc 12 số CCCD/CMND", autocomplete = "off" })
+        @Html.ValidationMessageFor(x => x.CCCD, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-md-6">
+        @Html.LabelFor(x => x.GioiTinh, new { @class = "form-label" })
+        @Html.DropDownListFor(x => x.GioiTinh, new[] { new SelectListItem { Text = "Nam", Value = "Nam" }, new SelectListItem { Text = "Nữ", Value = "Nữ" }, new SelectListItem { Text = "Khác", Value = "Khác" } }, "-- Chọn giới tính --", new { @class = "form-select" })
+        @Html.ValidationMessageFor(x => x.GioiTinh, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-md-6">
+        @Html.LabelFor(x => x.NamSinh, new { @class = "form-label" })
+        @Html.TextBoxFor(x => x.NamSinh, new { @class = "form-control", type = "number", min = "1900", max = DateTime.Today.Year, inputmode = "numeric", placeholder = "Ví dụ: 1995" })
+        @Html.ValidationMessageFor(x => x.NamSinh, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-md-6">
+        @Html.LabelFor(x => x.DienThoai, new { @class = "form-label" })
+        @Html.TextBoxFor(x => x.DienThoai, new { @class = "form-control", type = "tel", maxlength = "20", inputmode = "tel", autocomplete = "tel", placeholder = "Ví dụ: 0901234567" })
+        @Html.ValidationMessageFor(x => x.DienThoai, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-md-6">
+        @Html.LabelFor(x => x.Email, new { @class = "form-label" })
+        @Html.TextBoxFor(x => x.Email, new { @class = "form-control", type = "email", maxlength = "100", autocomplete = "email", placeholder = "vidu@gmail.com" })
+        @Html.ValidationMessageFor(x => x.Email, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-12">
+        @Html.LabelFor(x => x.DiaChi, new { @class = "form-label" })
+        @Html.TextAreaFor(x => x.DiaChi, new { @class = "form-control", rows = "3", maxlength = "255", autocomplete = "street-address", placeholder = "Ví dụ: 123 Lê Lợi, Quận 1, TP.HCM" })
+        @Html.ValidationMessageFor(x => x.DiaChi, "", new { @class = "text-danger" })
+    </div>
+</div>

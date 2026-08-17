@@ -1,0 +1,36 @@
+﻿@model QLKS.Models.PaginationViewModel
+@using Microsoft.AspNetCore.Routing
+@if (Model != null && Model.TotalPages > 1)
+{
+    var start = Math.Max(1, Model.CurrentPage - 2);
+    var end = Math.Min(Model.TotalPages, Model.CurrentPage + 2);
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 p-3 border-top">
+        <span class="result-summary">Tổng cộng @Model.TotalItems kết quả</span>
+        <nav aria-label="Phân trang">
+            <ul class="pagination pagination-sm">
+                @{
+                    var previousValues = new RouteValueDictionary(Model.RouteValues ?? new RouteValueDictionary());
+                    previousValues["page"] = Math.Max(1, Model.CurrentPage - 1);
+                }
+                <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                    <a class="page-link" href="@(Model.CurrentPage <= 1 ? "#" : Url.Action(Model.Action, Model.Controller, previousValues))" aria-label="Trang trước">‹</a>
+                </li>
+                @for (var pageNumber = start; pageNumber <= end; pageNumber++)
+                {
+                    var pageValues = new RouteValueDictionary(Model.RouteValues ?? new RouteValueDictionary());
+                    pageValues["page"] = pageNumber;
+                    <li class="page-item @(pageNumber == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action(Model.Action, Model.Controller, pageValues)" aria-current="@(pageNumber == Model.CurrentPage ? "page" : null)">@pageNumber</a>
+                    </li>
+                }
+                @{
+                    var nextValues = new RouteValueDictionary(Model.RouteValues ?? new RouteValueDictionary());
+                    nextValues["page"] = Math.Min(Model.TotalPages, Model.CurrentPage + 1);
+                }
+                <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" href="@(Model.CurrentPage >= Model.TotalPages ? "#" : Url.Action(Model.Action, Model.Controller, nextValues))" aria-label="Trang sau">›</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+}

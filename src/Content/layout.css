@@ -1,0 +1,126 @@
+.app-shell { min-height: 100vh; }
+
+.app-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 1040;
+    display: flex;
+    width: var(--sidebar-width);
+    flex-direction: column;
+    color: #dbeafe;
+    background: #0f172a;
+    box-shadow: 6px 0 24px rgba(15, 23, 42, .12);
+    transition: transform var(--transition);
+}
+
+.sidebar-brand {
+    display: flex;
+    min-height: var(--topbar-height);
+    padding: .85rem 1.1rem;
+    align-items: center;
+    gap: .75rem;
+    color: #fff;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, .09);
+}
+.sidebar-brand:hover { color: #fff; }
+.brand-mark {
+    display: inline-flex;
+    width: 42px;
+    height: 42px;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    font-size: 1.35rem;
+    background: var(--primary);
+    border-radius: 11px;
+}
+.brand-text { min-width: 0; font-size: 1rem; font-weight: 700; line-height: 1.25; }
+.brand-caption { display: block; margin-top: .15rem; color: #94a3b8; font-size: .72rem; font-weight: 500; }
+
+.sidebar-scroll { padding: .9rem .75rem 1.25rem; overflow-y: auto; }
+.nav-section { margin: 1rem .65rem .35rem; color: #94a3b8; font-size: .7rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+.sidebar-nav { gap: .2rem; }
+.sidebar-nav .nav-link {
+    display: flex;
+    min-height: 44px;
+    padding: .65rem .75rem;
+    align-items: center;
+    gap: .7rem;
+    color: #cbd5e1;
+    border-radius: 9px;
+}
+.sidebar-nav .nav-link:hover { color: #fff; background: rgba(255, 255, 255, .07); }
+.sidebar-nav .nav-link.active { color: #fff; background: var(--primary); box-shadow: 0 5px 14px rgba(29, 78, 216, .26); }
+.sidebar-nav .ui-icon { width: 1.35rem; }
+
+.sidebar-account {
+    margin-top: auto;
+    padding: .9rem 1rem;
+    border-top: 1px solid rgba(255, 255, 255, .09);
+}
+.sidebar-user { min-width: 0; }
+.sidebar-user-name { color: #fff; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar-user-role { color: #94a3b8; font-size: .8rem; }
+.sidebar-avatar { width: 38px; height: 38px; font-size: .9rem; }
+
+.app-main { min-height: 100vh; margin-left: var(--sidebar-width); transition: margin var(--transition); }
+.app-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    display: flex;
+    min-height: var(--topbar-height);
+    padding: .75rem clamp(1rem, 3vw, 2rem);
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: rgba(255, 255, 255, .96);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+}
+.topbar-heading { min-width: 0; }
+.topbar-title { margin: 0; overflow: hidden; font-size: 1.08rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.topbar-date { color: var(--text-secondary); font-size: .8rem; }
+.topbar-actions { display: flex; align-items: center; gap: .65rem; }
+.sidebar-toggle { display: none; }
+
+.app-content { padding: 1rem clamp(1rem, 3vw, 2rem) 2rem; }
+.app-breadcrumb { margin-bottom: 1rem; }
+.app-breadcrumb .breadcrumb { margin: 0; font-size: .86rem; }
+.content-surface { min-height: calc(100vh - 160px); }
+.app-footer { padding: 1rem 2rem 1.5rem; color: var(--text-secondary); font-size: .82rem; text-align: center; }
+.sidebar-backdrop { display: none; }
+
+@media (max-width: 991.98px) {
+    .app-sidebar { transform: translateX(-105%); }
+    .app-sidebar.is-open { transform: translateX(0); }
+    .app-main { margin-left: 0; }
+    .sidebar-toggle { display: inline-flex; }
+    .sidebar-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 1035;
+        display: block;
+        visibility: hidden;
+        background: rgba(15, 23, 42, .5);
+        opacity: 0;
+        transition: opacity var(--transition), visibility var(--transition);
+    }
+    .sidebar-backdrop.is-visible { visibility: visible; opacity: 1; }
+    body.sidebar-open { overflow: hidden; }
+}
+
+@media (max-width: 575.98px) {
+    :root { --topbar-height: 64px; }
+    .app-sidebar { width: min(88vw, 300px); }
+    .app-topbar { padding: .65rem .85rem; }
+    .topbar-date, .topbar-user-label { display: none; }
+    .app-content { padding: .85rem .75rem 1.5rem; }
+    .app-breadcrumb { margin-bottom: .75rem; }
+    .content-surface { min-height: calc(100vh - 130px); }
+}
+
+@media print {
+    .app-main { margin-left: 0 !important; }
+}

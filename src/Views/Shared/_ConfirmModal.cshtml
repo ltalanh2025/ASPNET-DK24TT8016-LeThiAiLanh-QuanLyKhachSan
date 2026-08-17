@@ -1,0 +1,19 @@
+<div class="modal fade" id="confirmActionModal" tabindex="-1" aria-labelledby="confirmActionTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="confirmActionTitle">Xác nhận thao tác</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmActionMessage" class="mb-2">Bạn có chắc chắn muốn tiếp tục?</p>
+                <div id="confirmActionTarget" class="rounded border bg-light p-3 fw-semibold" hidden></div>
+                <p class="small text-muted mt-3 mb-0">Hãy kiểm tra đúng đối tượng trước khi xác nhận.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmActionButton">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+</div>

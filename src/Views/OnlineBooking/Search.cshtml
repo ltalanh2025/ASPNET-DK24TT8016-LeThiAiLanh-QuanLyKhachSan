@@ -1,0 +1,31 @@
+﻿@model QLKS.Models.RoomSearchViewModel
+@{
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    ViewBag.Title = "Tìm phòng trống";
+}
+<section class="resort-search-hero">
+    <div class="resort-search-overlay"></div>
+    <div class="resort-container resort-search-content">
+        <span class="resort-kicker light">Phòng nghỉ &amp; Suites</span>
+        <h1>Chọn khoảng thời gian dành riêng cho bạn</h1>
+        <p>Kết quả phòng trống và giá được kiểm tra trực tiếp từ dữ liệu hiện hành của khách sạn.</p>
+        <div class="resort-booking-widget wide">
+            @await Html.PartialAsync("_ValidationSummary")
+            @using (Html.BeginForm("AvailableRooms", "OnlineBooking", FormMethod.Get, new { @class = "resort-booking-form", role = "search", data_booking_search = "" }))
+            {
+                <div class="resort-field">@Html.LabelFor(x => x.NgayNhanPhong)@Html.TextBoxFor(x => x.NgayNhanPhong, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", min = DateTime.Today.ToString("yyyy-MM-dd"), data_check_in = "" })@Html.ValidationMessageFor(x => x.NgayNhanPhong, "", new { @class = "text-danger small" })</div>
+                <div class="resort-field">@Html.LabelFor(x => x.NgayTraPhong)@Html.TextBoxFor(x => x.NgayTraPhong, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date", min = DateTime.Today.AddDays(1).ToString("yyyy-MM-dd"), data_check_out = "" })@Html.ValidationMessageFor(x => x.NgayTraPhong, "", new { @class = "text-danger small" })</div>
+                <div class="resort-field">@Html.LabelFor(x => x.SoNguoi)@Html.TextBoxFor(x => x.SoNguoi, new { @class = "form-control", type = "number", min = "1", max = "50" })@Html.ValidationMessageFor(x => x.SoNguoi, "", new { @class = "text-danger small" })</div>
+                <button type="submit" class="btn resort-btn-primary">Kiểm tra phòng</button>
+            }
+        </div>
+    </div>
+</section>
+<section class="resort-section resort-container">
+    <div class="resort-benefit-grid">
+        <article><span aria-hidden="true">✓</span><div><h2>Giá minh bạch</h2><p>Giá phòng được lấy trực tiếp từ cơ sở dữ liệu.</p></div></article>
+        <article><span aria-hidden="true">◷</span><div><h2>Giữ chỗ 15 phút</h2><p>Đủ thời gian để hoàn tất bước thanh toán cọc.</p></div></article>
+        <article><span aria-hidden="true">20%</span><div><h2>Thanh toán cọc</h2><p>Chỉ thanh toán trước 20% tổng giá trị dự kiến.</p></div></article>
+    </div>
+</section>
+@section scripts { @Scripts.Render("~/bundles/jqueryval") }

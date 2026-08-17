@@ -1,0 +1,34 @@
+﻿@model QLKS.Models.RoomEditViewModel
+@using QLKS.Models
+@using QLKS.Services
+@{ ViewBag.Title = "Sửa phòng"; var fieldData = new ViewDataDictionary<object>(ViewData) { { "RoomTypes", ViewBag.MaLoai } }; var image = string.IsNullOrWhiteSpace(Model.AnhHienTai) ? ImageUploadService.DefaultImage : Model.AnhHienTai; }
+@await Html.PartialAsync("_PageHeader", new PageHeaderViewModel { Title = "Chỉnh sửa phòng " + Model.SoPhong, Subtitle = "Cập nhật thông tin phòng; trạng thái phòng được quản lý theo nghiệp vụ riêng.", Icon = "✎" })
+<div class="form-shell">
+    @using (Html.BeginForm("Edit", "Phong", FormMethod.Post, new { enctype = "multipart/form-data", @class = "surface-card p-3 p-md-4" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(x => x.MaPhong)
+        @await Html.PartialAsync("_ValidationSummary")
+        <section class="form-section" aria-labelledby="roomInfoTitle">
+            <h2 class="form-section-title" id="roomInfoTitle">Thông tin phòng</h2>
+            @await Html.PartialAsync("_RoomFormFields", Model, fieldData)
+        </section>
+        <section class="form-section border-top pt-3" aria-labelledby="roomImageTitle">
+            <h2 class="form-section-title" id="roomImageTitle">Ảnh đại diện</h2>
+            <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center">
+                <img src="@Url.Content("~/Content/Images/" + image)" alt="Ảnh hiện tại của phòng @Model.SoPhong" class="room-edit-preview" />
+                <div class="flex-grow-1">
+                    <label for="HinhAnh" class="form-label">Thay ảnh mới</label>
+                    <input id="HinhAnh" name="HinhAnh" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+                    @Html.ValidationMessage("HinhAnh", new { @class = "text-danger" })
+                    <p class="form-help mt-2 mb-0">Bỏ trống nếu muốn giữ ảnh hiện tại.</p>
+                </div>
+            </div>
+        </section>
+        <div class="form-actions">
+            <a href="@Url.Action("Index")" class="btn btn-outline-secondary">Hủy</a>
+            <button type="submit" class="btn btn-primary" data-loading-text="Đang lưu thay đổi...">Lưu thay đổi</button>
+        </div>
+    }
+</div>
+@section Scripts { @Scripts.Render("~/bundles/jqueryval") }

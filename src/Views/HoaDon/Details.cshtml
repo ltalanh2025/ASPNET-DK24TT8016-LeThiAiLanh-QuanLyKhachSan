@@ -1,0 +1,121 @@
+﻿@model QLKS.Data.HoaDon
+@using QLKS.Models
+@{
+    ViewBag.Title = "Hóa đơn #" + Model.MaHD;
+    var roomDetail = Model.ChiTietHoaDons == null ? null : Model.ChiTietHoaDons.FirstOrDefault();
+    var roomNumber = roomDetail == null || roomDetail.Phong == null ? "—" : roomDetail.Phong.SoPhong;
+    var roomPrice = roomDetail == null ? 0m : (roomDetail.DonGiaThucTe ?? 0m);
+    var days = (int)(ViewBag.SoNgay ?? 1);
+    var roomTotal = roomPrice * days;
+    var serviceTotal = Model.ChiTietDichVus == null ? 0m : Model.ChiTietDichVus.Sum(x => (x.SoLuong ?? 0) * (x.DonGia ?? 0m));
+    var grandTotal = Model.DaThanhToan == true ? (Model.TongTien ?? roomTotal + serviceTotal) : roomTotal + serviceTotal;
+    var depositReceived = Math.Min(grandTotal, Math.Max(0m, Model.TienCocDaNhan));
+    var remainingTotal = Math.Max(0m, grandTotal - depositReceived);
+    var isPaid = Model.DaThanhToan == true || Model.TinhTrang == (int)InvoiceStatus.Paid;
+    var statusText = isPaid ? "Đã thanh toán" : Model.TinhTrang == (int)InvoiceStatus.CheckedIn ? "Đang ở" : "Đang đặt";
+    var statusClass = isPaid ? "status-paid" : Model.TinhTrang == (int)InvoiceStatus.CheckedIn ? "status-occupied" : "status-reserved";
+}
+@await Html.PartialAsync("_PageHeader", new PageHeaderViewModel { Title = "Chi tiết hóa đơn #" + Model.MaHD, Subtitle = "Kiểm tra chi phí lưu trú, dịch vụ và trạng thái thanh toán.", Icon = "▤" })
+
+<article class="invoice-sheet surface-card" id="printArea">
+    <div class="card-body p-4 p-md-5">
+        <header class="invoice-header text-center mb-4">
+            <p class="small text-uppercase fw-bold text-primary mb-2">@ViewBag.HotelName</p>
+            <h1 class="h2 text-uppercase mb-2">Hóa đơn thanh toán</h1>
+            <p class="text-muted mb-1">@ViewBag.HotelAddress</p>
+            @if (!string.IsNullOrWhiteSpace(Convert.ToString(ViewBag.HotelPhone))) { <p class="text-muted mb-0">Điện thoại: @ViewBag.HotelPhone</p> }
+        </header>
+
+        <div class="d-flex justify-content-between align-items-center gap-2 mb-4">
+            <div><span class="text-muted small d-block">Mã hóa đơn</span><strong class="fs-5">#@Model.MaHD</strong></div>
+            @await Html.PartialAsync("_StatusBadge", new StatusBadgeViewModel { Text = statusText, CssClass = statusClass, Icon = isPaid ? "✓" : "●" })
+        </div>
+
+        <section class="invoice-meta mb-4" aria-label="Thông tin hóa đơn">
+            <div class="rounded border p-3">
+                <h2 class="h6 mb-3">Thông tin khách hàng</h2>
+                <dl class="row mb-0 small">
+                    <dt class="col-5 text-muted">Họ tên</dt><dd class="col-7 fw-semibold">@(Model.KhachHang == null || string.IsNullOrWhiteSpace(Model.KhachHang.TenKH) ? "—" : Model.KhachHang.TenKH)</dd>
+                    <dt class="col-5 text-muted">Điện thoại</dt><dd class="col-7">@(Model.KhachHang == null || string.IsNullOrWhiteSpace(Model.KhachHang.DienThoai) ? "—" : Model.KhachHang.DienThoai)</dd>
+                    <dt class="col-5 text-muted">Địa chỉ</dt><dd class="col-7 content-wrap">@(Model.KhachHang == null || string.IsNullOrWhiteSpace(Model.KhachHang.DiaChi) ? "—" : Model.KhachHang.DiaChi)</dd>
+                </dl>
+            </div>
+            <div class="rounded border p-3">
+                <h2 class="h6 mb-3">Thông tin lưu trú</h2>
+                <dl class="row mb-0 small">
+                    <dt class="col-5 text-muted">Phòng</dt><dd class="col-7 fw-semibold">@roomNumber</dd>
+                    <dt class="col-5 text-muted">Check-in</dt><dd class="col-7">@(Model.NgayCheckIn.HasValue ? Model.NgayCheckIn.Value.ToString("dd/MM/yyyy HH:mm") : "—")</dd>
+                    <dt class="col-5 text-muted">Check-out</dt><dd class="col-7">@(Model.NgayCheckOut.HasValue ? Model.NgayCheckOut.Value.ToString("dd/MM/yyyy HH:mm") : "Chưa checkout")</dd>
+                    <dt class="col-5 text-muted">Nhân viên</dt><dd class="col-7">@(Model.NhanVien == null || string.IsNullOrWhiteSpace(Model.NhanVien.TenNV) ? "—" : Model.NhanVien.TenNV)</dd>
+                </dl>
+            </div>
+        </section>
+
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered align-middle">
+                <thead><tr><th scope="col">Nội dung</th><th scope="col" class="text-end">Đơn giá</th><th scope="col" class="text-center">Số lượng</th><th scope="col" class="text-end">Thành tiền</th></tr></thead>
+                <tbody>
+                    <tr><td>Tiền phòng @roomNumber</td><td class="text-end currency">@roomPrice.ToString("N0") đ</td><td class="text-center">@days ngày</td><td class="text-end currency">@roomTotal.ToString("N0") đ</td></tr>
+                    @if (Model.ChiTietDichVus != null && Model.ChiTietDichVus.Any())
+                    {
+                        foreach (var service in Model.ChiTietDichVus)
+                        {
+                            var quantity = service.SoLuong ?? 0;
+                            var price = service.DonGia ?? 0m;
+                            <tr><td>@(service.DichVu == null || string.IsNullOrWhiteSpace(service.DichVu.TenDV) ? "Dịch vụ" : service.DichVu.TenDV)</td><td class="text-end currency">@price.ToString("N0") đ</td><td class="text-center">@quantity</td><td class="text-end currency">@((quantity * price).ToString("N0")) đ</td></tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="4" class="text-center text-muted py-3">Không sử dụng dịch vụ bổ sung</td></tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr><th colspan="3" class="text-end">Tổng chi phí</th><th class="text-end currency">@grandTotal.ToString("N0") đ</th></tr>
+                    <tr><th colspan="3" class="text-end text-success">Tiền cọc đã nhận</th><th class="text-end text-success currency">- @depositReceived.ToString("N0") đ</th></tr>
+                    <tr><th colspan="3" class="text-end">Còn lại sau cọc</th><th class="text-end text-danger invoice-total currency">@remainingTotal.ToString("N0") đ</th></tr>
+                </tfoot>
+            </table>
+        </div>
+        <div class="row small">
+            <div class="col-sm-6"><span class="text-muted">Ghi chú:</span> @(string.IsNullOrWhiteSpace(Model.GhiChu) ? "Không có" : Model.GhiChu)</div>
+            <div class="col-sm-6 text-sm-end print-date">Ngày in: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</div>
+        </div>
+    </div>
+</article>
+
+<div class="d-flex flex-wrap justify-content-center gap-2 mt-3 no-print">
+    <a href="@Url.Action("Index")" class="btn btn-outline-secondary">Quay lại danh sách</a>
+    <button type="button" class="btn btn-outline-primary" data-print-page>In hóa đơn</button>
+    @if (!isPaid && Model.TinhTrang == (int)InvoiceStatus.CheckedIn)
+    {
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#checkoutModal">Checkout &amp; thanh toán</button>
+    }
+</div>
+
+@if (!isPaid && Model.TinhTrang == (int)InvoiceStatus.CheckedIn)
+{
+    <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        @using (Html.BeginForm("Checkout", "HoaDon", new { id = Model.MaHD }, FormMethod.Post, new { }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="modal-header"><h2 class="modal-title fs-5" id="checkoutTitle">Xác nhận thanh toán hóa đơn #@Model.MaHD</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+            <div class="modal-body">
+                <dl class="row mb-0">
+                    <dt class="col-5 text-muted">Khách hàng</dt><dd class="col-7 fw-semibold">@(Model.KhachHang == null ? "—" : Model.KhachHang.TenKH)</dd>
+                    <dt class="col-5 text-muted">Phòng</dt><dd class="col-7">@roomNumber</dd>
+                    <dt class="col-5 text-muted">Số ngày ở</dt><dd class="col-7">@days ngày</dd>
+                    <dt class="col-5 text-muted">Tiền phòng</dt><dd class="col-7 currency">@roomTotal.ToString("N0") đ</dd>
+                    <dt class="col-5 text-muted">Tiền dịch vụ</dt><dd class="col-7 currency">@serviceTotal.ToString("N0") đ</dd>
+                    <dt class="col-5 text-muted">Tổng chi phí</dt><dd class="col-7 currency">@grandTotal.ToString("N0") đ</dd>
+                    <dt class="col-5 text-success">Cọc đã nhận</dt><dd class="col-7 text-success currency">- @depositReceived.ToString("N0") đ</dd>
+                    <dt class="col-5 pt-2 border-top">Còn phải thu</dt><dd class="col-7 pt-2 border-top invoice-total text-danger currency">@remainingTotal.ToString("N0") đ</dd>
+                </dl>
+                <p class="small text-muted mt-3 mb-0">Thao tác ghi nhận đã thanh toán và chuyển phòng sang Đang dọn.</p>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button><button type="submit" class="btn btn-danger" data-loading-text="Đang thanh toán...">Xác nhận thanh toán</button></div>
+        }
+        </div></div>
+    </div>
+}

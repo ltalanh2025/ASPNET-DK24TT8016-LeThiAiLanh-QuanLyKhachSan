@@ -1,0 +1,20 @@
+@{
+    var messages = new[]
+    {
+        new { Key = "Success", Css = "success", Icon = "✓", Label = "Thành công" },
+        new { Key = "Error", Css = "danger", Icon = "!", Label = "Có lỗi" },
+        new { Key = "Warning", Css = "warning", Icon = "!", Label = "Lưu ý" },
+        new { Key = "Info", Css = "info", Icon = "i", Label = "Thông tin" }
+    };
+}
+@foreach (var item in messages)
+{
+    if (TempData[item.Key] != null)
+    {
+        <div class="alert alert-@item.Css alert-dismissible fade show d-flex align-items-start gap-2" role="alert" aria-live="polite" data-auto-dismiss>
+            <span class="ui-icon" aria-hidden="true">@item.Icon</span>
+            <div class="flex-grow-1"><strong>@item.Label:</strong> @TempData[item.Key]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng thông báo"></button>
+        </div>
+    }
+}

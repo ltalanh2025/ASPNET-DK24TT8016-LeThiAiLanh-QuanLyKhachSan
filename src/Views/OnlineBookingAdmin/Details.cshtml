@@ -1,0 +1,41 @@
+﻿@model QLKS.Models.OnlineBookingDetailsViewModel
+@using QLKS.Models
+@{ ViewBag.Title = "Đơn online #" + Model.MaDatPhong; var version = Convert.ToBase64String(Model.RowVersion ?? new byte[0]); }
+@await Html.PartialAsync("_PageHeader", new PageHeaderViewModel { Title = "Đơn online #" + Model.MaDatPhong, Subtitle = "Kiểm tra lịch, tiền cọc và thực hiện nghiệp vụ tiếp nhận khách.", Icon = "◫", ActionUrl = Url.Action("Index"), ActionText = "Danh sách", ActionIcon = "←" })
+<div class="row g-4">
+    <div class="col-xl-8">
+        <section class="surface-card"><div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-4"><div><span class="small text-muted">Tạo @Model.NgayDat.ToString("dd/MM/yyyy HH:mm")</span><h2 class="h4 mt-1">Phòng @Model.RoomNumber</h2></div>@await Html.PartialAsync("_StatusBadge", new StatusBadgeViewModel { Text = OnlineBookingPresentation.Label(Model.TrangThai), CssClass = OnlineBookingPresentation.CssClass(Model.TrangThai), Icon = OnlineBookingPresentation.Icon(Model.TrangThai) })</div>
+            <h3 class="h6">Thông tin khách hàng</h3><dl class="detail-grid mb-4"><div><dt>Họ tên</dt><dd>@Model.CustomerName</dd></div><div><dt>Email</dt><dd class="content-wrap">@Model.CustomerEmail</dd></div><div><dt>Điện thoại</dt><dd>@Model.CustomerPhone</dd></div><div><dt>Mã khách hàng</dt><dd>#@Model.MaKH</dd></div></dl>
+            <h3 class="h6">Thông tin lưu trú</h3><dl class="detail-grid"><div><dt>Ngày nhận</dt><dd>@Model.NgayNhanPhong.ToString("dd/MM/yyyy")</dd></div><div><dt>Ngày trả</dt><dd>@Model.NgayTraPhong.ToString("dd/MM/yyyy")</dd></div><div><dt>Số khách / số đêm</dt><dd>@Model.SoNguoi người · @Model.SoDem đêm</dd></div><div><dt>Giá tại lúc đặt</dt><dd class="currency">@Model.DonGiaTaiThoiDiemDat.ToString("N0") đ/đêm</dd></div>@if (!string.IsNullOrWhiteSpace(Model.GhiChu)) { <div class="detail-grid-wide"><dt>Ghi chú</dt><dd>@Model.GhiChu</dd></div> }</dl>
+            @if (Model.NgayHuy.HasValue) { <div class="alert alert-warning mt-4 mb-0"><strong>Hủy lúc @Model.NgayHuy.Value.ToString("dd/MM/yyyy HH:mm")</strong><div>@Model.LyDoHuy</div></div> }
+        </div></section>
+        @if (Model.Payments != null && Model.Payments.Any())
+        {
+            <section class="surface-card data-card mt-4"><div class="p-3 border-bottom"><h2 class="h5 mb-0">Giao dịch cọc</h2></div><div class="table-responsive"><table class="table"><thead><tr><th>Mã giao dịch</th><th>Phương thức</th><th>Thời gian</th><th class="text-end">Số tiền</th><th>Trạng thái</th></tr></thead><tbody>@foreach (var payment in Model.Payments) { <tr><td class="fw-semibold">@payment.TransactionCode</td><td>@payment.Method</td><td>@payment.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td><td class="text-end currency">@payment.Amount.ToString("N0") đ</td><td>@payment.Status</td></tr> }</tbody></table></div></section>
+        }
+    </div>
+    <div class="col-xl-4">
+        <aside class="surface-card booking-cost-card"><div class="card-body p-4"><h2 class="h5">Tài chính</h2><div class="cost-line"><span>Tổng dự kiến</span><strong>@Model.TongTienDuKien.ToString("N0") đ</strong></div><div class="deposit-highlight"><span>Tiền cọc 20%</span><strong>@Model.TienCoc.ToString("N0") đ</strong></div>@if (!string.IsNullOrWhiteSpace(Model.TransactionCode)) { <p class="small mt-3 mb-0">Giao dịch: <strong>@Model.TransactionCode</strong></p> }</div></aside>
+        <aside class="surface-card mt-4"><div class="card-body p-4"><h2 class="h5 mb-3">Xử lý đơn</h2>
+            @if (Model.TrangThai == OnlineBookingStatus.Deposited)
+            {
+                using (Html.BeginForm("Confirm", "OnlineBookingAdmin", FormMethod.Post, new { data_confirm = "", data_confirm_title = "Xác nhận đơn", data_confirm_message = "Xác nhận đơn đã đặt cọc và lịch phòng hợp lệ?", data_confirm_target = "Đơn #" + Model.MaDatPhong, data_confirm_button = "Xác nhận", data_confirm_class = "btn-success", @class = "mb-2" })) { @Html.AntiForgeryToken()<input type="hidden" name="MaDatPhong" value="@Model.MaDatPhong" /><input type="hidden" name="RowVersion" value="@version" /><button class="btn btn-success w-100" type="submit">Xác nhận đơn</button> }
+            }
+            @if ((Model.TrangThai == OnlineBookingStatus.Deposited || Model.TrangThai == OnlineBookingStatus.Confirmed) && DateTime.Today >= Model.NgayNhanPhong.Date && DateTime.Today < Model.NgayTraPhong.Date)
+            {
+                using (Html.BeginForm("CheckIn", "OnlineBookingAdmin", FormMethod.Post, new { data_confirm = "", data_confirm_title = "Check-in khách", data_confirm_message = "Tạo hóa đơn, ghi nhận tiền cọc và chuyển phòng sang Đang ở?", data_confirm_target = "Đơn #" + Model.MaDatPhong + " · Phòng " + Model.RoomNumber, data_confirm_button = "Check-in", data_confirm_class = "btn-primary", @class = "mb-2" })) { @Html.AntiForgeryToken()<input type="hidden" name="MaDatPhong" value="@Model.MaDatPhong" /><input type="hidden" name="RowVersion" value="@version" /><button class="btn btn-primary w-100" type="submit">Chuyển thành check-in</button> }
+            }
+            @if (OnlineBookingPresentation.CanCustomerCancel(Model.TrangThai))
+            {
+                using (Html.BeginForm("Reject", "OnlineBookingAdmin", FormMethod.Post, new { data_confirm = "", data_confirm_title = "Từ chối / hủy đơn", data_confirm_message = "Đơn đã nhận cọc sẽ chuyển sang Chờ hoàn cọc.", data_confirm_target = "Đơn #" + Model.MaDatPhong, data_confirm_button = "Hủy đơn", data_confirm_class = "btn-danger" })) { @Html.AntiForgeryToken()<input type="hidden" name="MaDatPhong" value="@Model.MaDatPhong" /><input type="hidden" name="RowVersion" value="@version" /><label class="form-label" for="Reason">Lý do từ chối/hủy</label><textarea class="form-control mb-2" id="Reason" name="Reason" rows="3" maxlength="500" required></textarea><button class="btn btn-outline-danger w-100" type="submit">Từ chối / hủy đơn</button> }
+            }
+            @if (Model.TrangThai == OnlineBookingStatus.RefundPending)
+            {
+                using (Html.BeginForm("Refund", "OnlineBookingAdmin", FormMethod.Post, new { data_confirm = "", data_confirm_title = "Ghi nhận hoàn cọc", data_confirm_message = "Xác nhận đã xử lý hoàn cọc mô phỏng cho khách?", data_confirm_target = "Đơn #" + Model.MaDatPhong + " · " + Model.TienCoc.ToString("N0") + " đ", data_confirm_button = "Đã hoàn cọc", data_confirm_class = "btn-warning" })) { @Html.AntiForgeryToken()<input type="hidden" name="MaDatPhong" value="@Model.MaDatPhong" /><input type="hidden" name="RowVersion" value="@version" /><button class="btn btn-warning w-100" type="submit">Ghi nhận đã hoàn cọc</button> }
+            }
+            @if (Model.MaHoaDon.HasValue) { <a class="btn btn-outline-primary w-100 mt-2" href="@Url.Action("Details", "HoaDon", new { id = Model.MaHoaDon.Value })">Mở hóa đơn #@Model.MaHoaDon</a> }
+            @if (Model.TrangThai != OnlineBookingStatus.Deposited && Model.TrangThai != OnlineBookingStatus.Confirmed && !OnlineBookingPresentation.CanCustomerCancel(Model.TrangThai) && Model.TrangThai != OnlineBookingStatus.RefundPending && !Model.MaHoaDon.HasValue) { <p class="text-muted small mb-0">Không có thao tác phù hợp với trạng thái hiện tại.</p> }
+        </div></aside>
+    </div>
+</div>

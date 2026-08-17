@@ -1,0 +1,37 @@
+﻿@model QLKS.Models.OnlineBookingPaymentViewModel
+@using QLKS.Models
+@{
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    ViewBag.Title = "Thanh toán tiền cọc";
+    var latestPayment = Model.Payments == null ? null : Model.Payments.OrderByDescending(x => x.CreatedAt).FirstOrDefault();
+    var remaining = Model.TongTienDuKien - Model.TienCoc;
+}
+<div class="resort-page-shell">
+<div class="booking-two-column">
+    <section class="surface-card"><div class="card-body p-4 p-lg-5">
+        <div class="d-flex justify-content-between gap-3 align-items-start"><div><span class="eyebrow">Bước 2/2 · Cổng mô phỏng</span><h1 class="h3 mt-2">Thanh toán tiền cọc</h1></div>@await Html.PartialAsync("_StatusBadge", new StatusBadgeViewModel { Text = OnlineBookingPresentation.Label(Model.TrangThai), CssClass = OnlineBookingPresentation.CssClass(Model.TrangThai), Icon = OnlineBookingPresentation.Icon(Model.TrangThai) })</div>
+        <div class="alert alert-info mt-4" role="note"><strong>Đây là thanh toán mô phỏng.</strong> Hệ thống không yêu cầu và không lưu số thẻ, CVV hay tài khoản ngân hàng.</div>
+        <dl class="booking-summary-list">
+            <div><dt>Mã đặt phòng</dt><dd>#@Model.MaDatPhong</dd></div><div><dt>Phòng</dt><dd>Phòng @Model.RoomNumber</dd></div>
+            <div><dt>Ngày nhận</dt><dd>@Model.NgayNhanPhong.ToString("dd/MM/yyyy")</dd></div><div><dt>Ngày trả</dt><dd>@Model.NgayTraPhong.ToString("dd/MM/yyyy")</dd></div>
+            <div><dt>Số đêm</dt><dd>@Model.SoDem đêm</dd></div><div><dt>Hạn thanh toán</dt><dd class="text-danger">@Model.HanThanhToan.ToString("dd/MM/yyyy HH:mm:ss")</dd></div>
+            <div><dt>Trạng thái giao dịch gần nhất</dt><dd>@(latestPayment == null ? "Chưa có giao dịch" : latestPayment.Status)</dd></div><div><dt>Mã giao dịch</dt><dd>@(latestPayment == null || string.IsNullOrWhiteSpace(latestPayment.TransactionCode) ? "—" : latestPayment.TransactionCode)</dd></div>
+        </dl>
+        @if (Model.CanPay)
+        {
+            <div class="customer-payment-countdown" data-payment-countdown data-deadline="@Model.HanThanhToan.ToString("yyyy-MM-ddTHH:mm:ss")" role="status" aria-live="polite">
+                <span>Thời gian còn lại để thanh toán</span><strong data-countdown-value>Đang tính...</strong>
+            </div>
+            <div class="d-grid d-sm-flex gap-2 mt-4">
+                @using (Html.BeginForm("PaySuccess", "OnlineBooking", new { id = Model.MaDatPhong }, FormMethod.Post, new { data_confirm = "", data_confirm_title = "Thanh toán cọc mô phỏng", data_confirm_message = "Xác nhận mô phỏng giao dịch thành công?", data_confirm_target = "Đơn #" + Model.MaDatPhong + " · " + Model.TienCoc.ToString("N0") + " đ", data_confirm_button = "Thanh toán thành công", data_confirm_class = "btn-success" })) { @Html.AntiForgeryToken()<button class="btn btn-success" type="submit" data-loading-text="Đang thanh toán...">Thanh toán thành công</button> }
+                @using (Html.BeginForm("PayFailure", "OnlineBooking", new { id = Model.MaDatPhong }, FormMethod.Post, new { })) { @Html.AntiForgeryToken()<button class="btn btn-outline-danger" type="submit" data-loading-text="Đang mô phỏng...">Mô phỏng thanh toán thất bại</button> }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-warning mt-4 mb-0">Đơn không còn ở trạng thái có thể thanh toán. <a href="@Url.Action("Details", new { id = Model.MaDatPhong })">Xem chi tiết đơn</a>.</div>
+        }
+    </div></section>
+    <aside class="surface-card booking-cost-card"><div class="card-body p-4"><h2 class="h5">Tóm tắt thanh toán</h2><div class="cost-line"><span>Tổng dự kiến</span><strong>@Model.TongTienDuKien.ToString("N0") VNĐ</strong></div><div class="cost-line"><span>Tỷ lệ cọc</span><strong>@Model.DepositRatePercent.ToString("N0")%</strong></div><div class="deposit-highlight"><span>Cần thanh toán</span><strong>@Model.TienCoc.ToString("N0") VNĐ</strong></div><div class="cost-line"><span>Còn lại dự kiến</span><strong>@remaining.ToString("N0") VNĐ</strong></div></div></aside>
+</div>
+</div>

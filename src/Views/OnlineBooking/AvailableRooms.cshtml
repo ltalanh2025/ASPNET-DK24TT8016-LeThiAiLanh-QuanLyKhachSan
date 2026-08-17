@@ -1,0 +1,125 @@
+﻿@model QLKS.Models.AvailableRoomsPageViewModel
+@using QLKS.Services
+@{
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    ViewBag.Title = "Phòng còn trống";
+}
+<header class="resort-rooms-header">
+    <div class="resort-rooms-header-shade"></div>
+    <div class="resort-container">
+        <span class="resort-kicker light">Kết quả theo thời gian thực</span>
+        <h1>Phòng nghỉ &amp; Suites</h1>
+        <p>@Model.Search.NgayNhanPhong.Value.ToString("dd/MM/yyyy") – @Model.Search.NgayTraPhong.Value.ToString("dd/MM/yyyy") · @Model.Search.SoNguoi khách</p>
+    </div>
+</header>
+<section class="resort-results-summary">
+    <div class="resort-container">
+        <div><strong>@(Model.Rooms == null ? 0 : Model.Rooms.Count)</strong><span>phòng phù hợp được tìm thấy</span></div>
+        <a class="btn resort-btn-outline" href="@Url.Action("Search")">Đổi ngày tìm kiếm</a>
+    </div>
+</section>
+<section class="resort-section resort-container">
+    @if (Model.Rooms != null && Model.Rooms.Any())
+    {
+        <div class="resort-room-list">
+            @for (var index = 0; index < Model.Rooms.Count; index++)
+            {
+                var room = Model.Rooms[index];
+                var image = string.IsNullOrWhiteSpace(room.AnhDaiDien)
+                    ? ImageUploadService.DefaultImage
+                    : room.AnhDaiDien;
+
+                <article class="resort-room-row @(index % 2 == 1 ? "reverse" : "")">
+                    <div class="resort-room-image">
+                        <img src="@Url.Content("~/Content/Images/" + image)"
+                             data-image-fallback="@Url.Content("~/Content/Images/" + ImageUploadService.DefaultImage)"
+                             alt="Ảnh phòng @room.SoPhong"
+                             loading="lazy" />
+                    </div>
+
+                    <div class="resort-room-copy">
+                        <span class="resort-kicker">
+                            @room.TenLoai · Tầng @room.Tang
+                        </span>
+
+                        <div class="resort-room-title-row">
+                            <h2>Phòng @room.SoPhong</h2>
+
+                            @if (room.ConTrongTrongKhoang)
+                            {
+                                <span class="customer-availability-badge">
+                                    Còn trống trong khoảng đã chọn
+                                </span>
+                            }
+                        </div>
+
+                        <div class="resort-room-facts">
+                            <span>♙ Tối đa @room.SoNguoiToiDa khách</span>
+                            <span>☾ @room.SoDem đêm</span>
+                        </div>
+
+                        <p>
+                            @(string.IsNullOrWhiteSpace(room.MoTa)
+                                ? "Không gian nghỉ ngơi tiện nghi và thoải mái."
+                                : room.MoTa)
+                        </p>
+
+                        <p class="customer-room-amenities">
+                            <strong>Tiện nghi:</strong>
+                            theo mô tả và tiêu chuẩn loại phòng @room.TenLoai.
+                        </p>
+
+                        <div class="resort-room-booking">
+                            <div>
+                                <small>Giá mỗi đêm</small>
+                                <strong>@room.GiaMoiDem.ToString("N0") VNĐ</strong>
+                                <span>
+                                    Tổng @room.TongTienDuKien.ToString("N0") VNĐ ·
+                                    Cọc 20%: @room.TienCoc.ToString("N0") VNĐ
+                                </span>
+                            </div>
+
+                            <div class="customer-room-actions">
+                                <a class="btn resort-btn-outline"
+                                   href="@Url.Action("RoomDetails", new
+                                   {
+                                       maPhong = room.MaPhong,
+                                       ngayNhanPhong = Model.Search.NgayNhanPhong.Value.ToString("yyyy-MM-dd"),
+                                       ngayTraPhong = Model.Search.NgayTraPhong.Value.ToString("yyyy-MM-dd"),
+                                       soNguoi = Model.Search.SoNguoi.Value
+                                   })">
+                                    Xem chi tiết
+                                </a>
+
+                                <a class="btn resort-btn-primary"
+                                   href="@Url.Action("Create", new
+                                   {
+                                       maPhong = room.MaPhong,
+                                       ngayNhanPhong = Model.Search.NgayNhanPhong.Value.ToString("yyyy-MM-dd"),
+                                       ngayTraPhong = Model.Search.NgayTraPhong.Value.ToString("yyyy-MM-dd"),
+                                       soNguoi = Model.Search.SoNguoi.Value
+                                   })">
+                                    Đặt phòng
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+    else
+    {
+        @await Html.PartialAsync(
+                                "_EmptyState",
+                                new QLKS.Models.EmptyStateViewModel
+                                {
+                                    Title = "Chưa tìm thấy phòng phù hợp",
+                                    Message = "Không còn phòng đủ sức chứa trong khoảng ngày này. Hãy thử một khoảng ngày hoặc số khách khác.",
+                                    Icon = "⌕",
+                                    ActionUrl = Url.Action("Search"),
+                                    ActionText = "Tìm lại"
+                                }
+                            )
+    }
+</section>

@@ -1,0 +1,70 @@
+@model QLKS.Models.CheckInViewModel
+@using QLKS.Models
+@{
+    ViewBag.Title = "Nhận phòng";
+    var selectedRoom = ViewBag.SelectedRoom as QLKS.Data.Phong;
+}
+@await Html.PartialAsync("_PageHeader", new PageHeaderViewModel { Title = "Phiếu nhận phòng", Subtitle = "Kiểm tra phòng, khách hàng và thời gian lưu trú trước khi xác nhận.", Icon = "＋" })
+<div class="form-shell">
+    @using (Html.BeginForm("Create", "HoaDon", FormMethod.Post, new { @class = "surface-card p-3 p-md-4" }))
+    {
+        @Html.AntiForgeryToken()
+        @await Html.PartialAsync("_ValidationSummary")
+
+        <section class="form-section" aria-labelledby="checkinRoomTitle">
+            <h2 class="form-section-title" id="checkinRoomTitle"><span class="status-badge status-neutral me-2">1</span> Thông tin phòng</h2>
+            @if (selectedRoom != null)
+            {
+                <div class="rounded border bg-light p-3 mb-3">
+                    <div class="d-flex flex-wrap justify-content-between gap-2">
+                        <div><span class="text-muted small d-block">Phòng đã chọn</span><strong class="fs-5">Phòng @selectedRoom.SoPhong</strong></div>
+                        <div><span class="text-muted small d-block">Loại phòng</span><strong>@(selectedRoom.LoaiPhong == null ? "Chưa thiết lập" : selectedRoom.LoaiPhong.TenLoai)</strong></div>
+                        <div class="text-sm-end"><span class="text-muted small d-block">Giá phòng</span><strong class="currency">@(selectedRoom.LoaiPhong != null && selectedRoom.LoaiPhong.GiaMacDinh.HasValue ? selectedRoom.LoaiPhong.GiaMacDinh.Value.ToString("N0") + " đ/ngày" : "Chưa có giá")</strong></div>
+                    </div>
+                </div>
+            }
+            @Html.LabelFor(x => x.MaPhong, new { @class = "form-label field-required" })
+            @Html.DropDownListFor(x => x.MaPhong, (SelectList)ViewBag.MaPhong, "-- Chọn phòng trống --", new { @class = "form-select" })
+            @Html.ValidationMessageFor(x => x.MaPhong, "", new { @class = "text-danger" })
+        </section>
+
+        <section class="form-section border-top pt-3" aria-labelledby="checkinCustomerTitle">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                <h2 class="form-section-title mb-0" id="checkinCustomerTitle"><span class="status-badge status-neutral me-2">2</span> Khách hàng</h2>
+                <a href="@Url.Action("Create", "KhachHang")" class="btn btn-sm btn-outline-primary">+ Thêm khách hàng mới</a>
+            </div>
+            <label for="customerSearch" class="form-label">Tìm nhanh khách hàng</label>
+            <input id="customerSearch" type="search" class="form-control mb-2" placeholder="Nhập họ tên hoặc SĐT khách hàng để lọc..." data-filter-select="MaKH" autocomplete="off" />
+            @Html.LabelFor(x => x.MaKH, new { @class = "form-label field-required" })
+            @Html.DropDownListFor(x => x.MaKH, (SelectList)ViewBag.MaKH, "-- Chọn khách hàng --", new { @class = "form-select", size = "6" })
+            @Html.ValidationMessageFor(x => x.MaKH, "", new { @class = "text-danger" })
+        </section>
+
+        <section class="form-section border-top pt-3" aria-labelledby="checkinStayTitle">
+            <h2 class="form-section-title" id="checkinStayTitle"><span class="status-badge status-neutral me-2">3</span> Thông tin lưu trú</h2>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    @Html.LabelFor(x => x.NgayCheckIn, new { @class = "form-label field-required" })
+                    @Html.TextBoxFor(x => x.NgayCheckIn, "{0:yyyy-MM-ddTHH:mm}", new { @class = "form-control", type = "datetime-local" })
+                    @Html.ValidationMessageFor(x => x.NgayCheckIn, "", new { @class = "text-danger" })
+                    <p class="form-help mt-1 mb-0">Thời gian hiển thị theo giờ Việt Nam.</p>
+                </div>
+                <div class="col-12">
+                    @Html.LabelFor(x => x.GhiChu, new { @class = "form-label" })
+                    @Html.TextAreaFor(x => x.GhiChu, new { @class = "form-control", rows = "3", maxlength = "255", placeholder = "Ghi chú yêu cầu đặc biệt khi nhận phòng (nếu có)..." })
+                    @Html.ValidationMessageFor(x => x.GhiChu, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </section>
+
+        <section class="form-section border-top pt-3" aria-labelledby="checkinConfirmTitle">
+            <h2 class="form-section-title" id="checkinConfirmTitle"><span class="status-badge status-neutral me-2">4</span> Xác nhận</h2>
+            <p class="text-muted small mb-0">Sau khi xác nhận, phòng sẽ chuyển sang trạng thái Đang ở và một hóa đơn hoạt động được tạo.</p>
+        </section>
+        <div class="form-actions">
+            <a href="@Url.Action("Index", "Phong")" class="btn btn-outline-secondary">Quay lại sơ đồ phòng</a>
+            <button type="submit" class="btn btn-primary" data-loading-text="Đang nhận phòng...">Xác nhận nhận phòng</button>
+        </div>
+    }
+</div>
+@section Scripts { @Scripts.Render("~/bundles/jqueryval") }

@@ -1,0 +1,5 @@
+﻿@model QLKS.Models.StatusBadgeViewModel
+<span class="status-badge @(string.IsNullOrWhiteSpace(Model.CssClass) ? "status-neutral" : Model.CssClass)">
+    @if (!string.IsNullOrWhiteSpace(Model.Icon)) { <span aria-hidden="true">@Model.Icon</span> }
+    @Model.Text
+</span>

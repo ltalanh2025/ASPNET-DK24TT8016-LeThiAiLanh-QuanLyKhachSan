@@ -1,0 +1,6 @@
+@{
+    var text = Convert.ToString(ViewData["Text"] ?? "Lưu");
+    var loadingText = Convert.ToString(ViewData["LoadingText"] ?? "Đang xử lý...");
+    var cssClass = Convert.ToString(ViewData["CssClass"] ?? "btn-primary");
+}
+<button type="submit" class="btn @cssClass" data-loading-text="@loadingText">@text</button>

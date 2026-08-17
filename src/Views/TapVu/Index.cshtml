@@ -1,0 +1,91 @@
+@model QLKS.Models.HousekeepingIndexViewModel
+@using QLKS.Models
+@{ ViewBag.Title = "Dọn phòng"; }
+@await Html.PartialAsync("_PageHeader", new PageHeaderViewModel { Title = "Công việc dọn phòng", Subtitle = "Danh sách phòng cần làm sạch hoặc đang được ghi nhận bảo trì.", Icon = "✓" })
+
+<form method="get" action="@Url.Action("Index")" class="surface-card filter-card no-print">
+    <div class="row g-2 align-items-end">
+        <div class="col-6 col-md-4">
+            <label class="form-label" for="tang">Tầng</label>
+            <select class="form-select" id="tang" name="tang">
+                <option value="">Tất cả tầng</option>
+                @foreach (var floor in Model.Floors) { <option value="@floor" selected="@(Model.Floor == floor ? "selected" : null)">Tầng @floor</option> }
+            </select>
+        </div>
+        <div class="col-6 col-md-4">
+            <label class="form-label" for="trangThai">Trạng thái</label>
+            <select class="form-select" id="trangThai" name="trangThai">
+                <option value="">Tất cả</option>
+                <option value="@RoomStatus.Cleaning" selected="@(Model.Status == RoomStatus.Cleaning ? "selected" : null)">Đang dọn</option>
+                <option value="@RoomStatus.Maintenance" selected="@(Model.Status == RoomStatus.Maintenance ? "selected" : null)">Bảo trì</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-4 filter-actions">
+            <button type="submit" class="btn btn-primary">Lọc công việc</button>
+            <a href="@Url.Action("Index")" class="btn btn-outline-secondary">Xóa lọc</a>
+        </div>
+    </div>
+</form>
+
+@if (Model.Rooms != null && Model.Rooms.Any())
+{
+    <p class="result-summary mb-3">Có @Model.Rooms.Count phòng cần xử lý</p>
+    <div class="room-grid">
+    @foreach (var room in Model.Rooms)
+    {
+        var isCleaning = room.TrangThai == RoomStatus.Cleaning;
+        <article class="surface-card room-card housekeeping-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                    <div><span class="text-muted small">Số phòng</span><h2 class="room-number">@room.SoPhong</h2></div>
+                    @await Html.PartialAsync("_StatusBadge", new StatusBadgeViewModel { Text = room.TrangThai, CssClass = isCleaning ? "status-cleaning" : "status-maintenance", Icon = isCleaning ? "↻" : "!" })
+                </div>
+                <div class="room-meta">
+                    <div class="room-meta-row"><span>Tầng</span><strong class="text-dark">@(room.Tang.HasValue ? room.Tang.Value.ToString() : "—")</strong></div>
+                    <div class="room-meta-row"><span>Loại phòng</span><strong class="text-dark">@(room.LoaiPhong == null ? "—" : room.LoaiPhong.TenLoai)</strong></div>
+                </div>
+            </div>
+            <div class="card-footer d-grid gap-2 no-print">
+                @if (isCleaning)
+                {
+                    using (Html.BeginForm("HoanTat", "TapVu", new { id = room.MaPhong }, FormMethod.Post, new { data_confirm = "true", data_confirm_title = "Hoàn tất dọn phòng", data_confirm_message = "Xác nhận phòng đã được làm sạch và sẵn sàng đón khách.", data_confirm_target = "Phòng " + room.SoPhong, data_confirm_button = "Xác nhận hoàn tất", data_confirm_class = "btn-success" }))
+                    {
+                        @Html.AntiForgeryToken()<button type="submit" class="btn btn-success" data-loading-text="Đang cập nhật...">Hoàn tất dọn phòng</button>
+                    }
+                }
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#maintenanceModal-@room.MaPhong">Báo bảo trì</button>
+            </div>
+        </article>
+
+        <div class="modal fade" id="maintenanceModal-@room.MaPhong" tabindex="-1" aria-labelledby="maintenanceTitle-@room.MaPhong" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    @using (Html.BeginForm("BaoTri", "TapVu", new { id = room.MaPhong }, FormMethod.Post, new { }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="modal-header">
+                            <h2 class="modal-title fs-5" id="maintenanceTitle-@room.MaPhong">Báo bảo trì phòng @room.SoPhong</h2>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                        </div>
+                        <div class="modal-body">
+                            <label for="reason-@room.MaPhong" class="form-label field-required">Lý do bảo trì</label>
+                            <textarea id="reason-@room.MaPhong" name="lyDo" class="form-control" maxlength="500" rows="4" required placeholder="Ví dụ: Hỏng vòi sen, điều hòa chảy nước, cần sửa khóa cửa..."></textarea>
+                            <p class="form-help mt-2 mb-0">Phòng sẽ chuyển sang trạng thái Bảo trì và lý do được lưu trong nhật ký.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-danger" data-loading-text="Đang gửi...">Gửi yêu cầu bảo trì</button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    </div>
+}
+else
+{
+    <div class="surface-card">
+        @await Html.PartialAsync("_EmptyState", new EmptyStateViewModel { Title = "Không có phòng cần xử lý", Message = "Danh sách sẽ tự cập nhật khi có phòng chuyển sang Đang dọn hoặc Bảo trì.", Icon = "✓" })
+    </div>
+}

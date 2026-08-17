@@ -1,0 +1,19 @@
+﻿@model IList<QLKS.Models.OnlineBookingListItemViewModel>
+@using QLKS.Models
+@{ Layout = "~/Views/Shared/_CustomerLayout.cshtml"; ViewBag.Title = "Đơn đặt phòng của tôi"; }
+<div class="resort-page-shell">
+<div class="d-flex flex-column flex-sm-row justify-content-between gap-3 align-items-sm-end mb-4"><div><span class="eyebrow">Lịch sử của bạn</span><h1 class="h2 mt-2 mb-1">Đơn đặt phòng của tôi</h1><p class="text-muted mb-0">Theo dõi trạng thái, giao dịch cọc và các mốc lưu trú.</p></div><a class="btn btn-primary" href="@Url.Action("Search")">Đặt phòng mới</a></div>
+@if (Model != null && Model.Any())
+{
+    <div class="surface-card data-card"><div class="table-responsive"><table class="table align-middle customer-bookings-table"><thead><tr><th>Mã đơn / Ngày đặt</th><th>Phòng</th><th>Ngày lưu trú</th><th class="text-end">Tổng / Cọc</th><th>Hạn thanh toán / Giao dịch</th><th class="text-center">Trạng thái</th><th class="text-end">Thao tác</th></tr></thead><tbody>
+    @foreach (var item in Model)
+    {
+        <tr><td><a class="fw-bold text-decoration-none" href="@Url.Action("Details", new { id = item.MaDatPhong })">#@item.MaDatPhong</a><small class="d-block text-muted">@item.NgayDat.ToString("dd/MM/yyyy HH:mm")</small></td><td>Phòng <strong>@item.RoomNumber</strong><small class="d-block text-muted">@item.SoDem đêm</small></td><td>@item.NgayNhanPhong.ToString("dd/MM/yyyy") – @item.NgayTraPhong.ToString("dd/MM/yyyy")</td><td class="text-end"><strong class="currency">@item.TongTienDuKien.ToString("N0") VNĐ</strong><small class="d-block text-success">Cọc @item.TienCoc.ToString("N0") VNĐ</small></td><td><span class="d-block">@item.HanThanhToan.ToString("dd/MM/yyyy HH:mm")</span><small class="d-block text-muted">@(string.IsNullOrWhiteSpace(item.TransactionCode) ? "Chưa có mã giao dịch" : item.TransactionCode)</small></td><td class="text-center">@await Html.PartialAsync("_StatusBadge", new StatusBadgeViewModel { Text = OnlineBookingPresentation.Label(item.TrangThai), CssClass = OnlineBookingPresentation.CssClass(item.TrangThai), Icon = OnlineBookingPresentation.Icon(item.TrangThai) })</td><td class="text-end table-actions"><a class="btn btn-sm btn-outline-primary" href="@Url.Action("Details", new { id = item.MaDatPhong })">Chi tiết</a>@if (OnlineBookingPresentation.CanPay(item.TrangThai, item.HanThanhToan, DateTime.Now)) { <a class="btn btn-sm btn-success" href="@Url.Action("Payment", new { id = item.MaDatPhong })">Thanh toán</a> }@if (OnlineBookingPresentation.CanCustomerCancel(item.TrangThai)) { <a class="btn btn-sm btn-outline-danger" href="@Url.Action("Cancel", new { id = item.MaDatPhong })">Hủy</a> }</td></tr>
+    }
+    </tbody></table></div></div>
+}
+else
+{
+    @await Html.PartialAsync("_EmptyState", new EmptyStateViewModel { Title = "Bạn chưa có đơn đặt phòng", Message = "Hãy tìm phòng theo ngày lưu trú để bắt đầu đơn đầu tiên.", Icon = "▣", ActionUrl = Url.Action("Search"), ActionText = "Tìm phòng" })
+}
+</div>

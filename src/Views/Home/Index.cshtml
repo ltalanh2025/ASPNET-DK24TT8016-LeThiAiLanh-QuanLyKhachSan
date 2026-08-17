@@ -1,0 +1,97 @@
+﻿@model QLKS.Models.DashboardViewModel
+@using QLKS.Models
+@{
+    ViewBag.Title = "Tổng quan";
+    var role = Convert.ToString(Session[SessionKeys.RoleName]);
+}
+@await Html.PartialAsync("_PageHeader", new PageHeaderViewModel
+{
+    Title = "Tổng quan khách sạn",
+    Subtitle = "Xin chào " + Convert.ToString(Session[SessionKeys.DisplayName]) + ". Đây là tình hình vận hành hôm nay.",
+    Icon = "⌂"
+})
+
+<section class="stats-grid mb-4" aria-label="Số liệu tổng quan">
+    <article class="surface-card stat-card info">
+        <div class="stat-card-top"><div><div class="stat-label">Tổng số phòng</div><div class="stat-value">@Model.TotalRooms</div></div><span class="stat-icon" aria-hidden="true">▦</span></div>
+        <a class="stat-link" href="@Url.Action("Index", "Phong")"><span class="visually-hidden">Xem toàn bộ phòng</span></a>
+    </article>
+    <article class="surface-card stat-card success">
+        <div class="stat-card-top"><div><div class="stat-label">Phòng trống</div><div class="stat-value">@Model.AvailableRooms</div></div><span class="stat-icon" aria-hidden="true">✓</span></div>
+        <a class="stat-link" href="@Url.Action("Index", "Phong", new { trangThai = RoomStatus.Available })"><span class="visually-hidden">Xem phòng trống</span></a>
+    </article>
+    <article class="surface-card stat-card info">
+        <div class="stat-card-top"><div><div class="stat-label">Phòng đang ở</div><div class="stat-value">@Model.OccupiedRooms</div></div><span class="stat-icon" aria-hidden="true">●</span></div>
+        <a class="stat-link" href="@Url.Action("Index", "Phong", new { trangThai = RoomStatus.Occupied })"><span class="visually-hidden">Xem phòng đang có khách</span></a>
+    </article>
+    <article class="surface-card stat-card warning">
+        <div class="stat-card-top"><div><div class="stat-label">Phòng đang dọn</div><div class="stat-value">@Model.CleaningRooms</div></div><span class="stat-icon" aria-hidden="true">↻</span></div>
+        <a class="stat-link" href="@Url.Action("Index", "TapVu", new { trangThai = RoomStatus.Cleaning })"><span class="visually-hidden">Xem phòng đang dọn</span></a>
+    </article>
+    <article class="surface-card stat-card danger">
+        <div class="stat-card-top"><div><div class="stat-label">Phòng bảo trì</div><div class="stat-value">@Model.MaintenanceRooms</div></div><span class="stat-icon" aria-hidden="true">!</span></div>
+        <a class="stat-link" href="@Url.Action("Index", "Phong", new { trangThai = RoomStatus.Maintenance })"><span class="visually-hidden">Xem phòng bảo trì</span></a>
+    </article>
+    <article class="surface-card stat-card">
+        <div class="stat-card-top"><div><div class="stat-label">Khách đang lưu trú</div><div class="stat-value">@Model.CurrentGuests</div></div><span class="stat-icon" aria-hidden="true">♙</span></div>
+        <a class="stat-link" href="@Url.Action("Index", "HoaDon", new { trangThai = (int)InvoiceStatus.CheckedIn })"><span class="visually-hidden">Xem khách đang lưu trú</span></a>
+    </article>
+    <article class="surface-card stat-card warning">
+        <div class="stat-card-top"><div><div class="stat-label">Hóa đơn chưa thanh toán</div><div class="stat-value">@Model.UnpaidInvoices</div></div><span class="stat-icon" aria-hidden="true">▤</span></div>
+        <a class="stat-link" href="@Url.Action("Index", "HoaDon", new { trangThai = (int)InvoiceStatus.CheckedIn })"><span class="visually-hidden">Xem hóa đơn chưa thanh toán</span></a>
+    </article>
+    @if (Model.CanViewRevenue)
+    {
+        <article class="surface-card stat-card success">
+            <div class="stat-card-top"><div><div class="stat-label">Doanh thu hôm nay</div><div class="stat-value fs-3">@Model.RevenueToday.ToString("N0") đ</div></div><span class="stat-icon" aria-hidden="true">₫</span></div>
+            <a class="stat-link" href="@Url.Action("BaoCao", "Admin")"><span class="visually-hidden">Xem báo cáo doanh thu</span></a>
+        </article>
+    }
+</section>
+
+<div class="row g-4">
+    <section class="col-lg-8" aria-labelledby="recentActivityTitle">
+        <div class="surface-card data-card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div><h2 class="h5 mb-1" id="recentActivityTitle">Hoạt động gần đây</h2><p class="small text-muted mb-0">Các thao tác mới nhất trong phạm vi bạn được xem.</p></div>
+                @if (role == RoleNames.Admin) { <a href="@Url.Action("Log", "Admin")" class="btn btn-sm btn-outline-primary">Xem nhật ký</a> }
+            </div>
+            @if (Model.RecentActivities != null && Model.RecentActivities.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead><tr><th scope="col">Thời gian</th><th scope="col">Người thực hiện</th><th scope="col">Hành động</th><th scope="col">Chi tiết</th></tr></thead>
+                        <tbody>
+                        @foreach (var item in Model.RecentActivities)
+                        {
+                            <tr>
+                                <td class="nowrap">@(item.Time.HasValue ? item.Time.Value.ToString("dd/MM HH:mm") : "—")</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.UserName) ? "Hệ thống" : item.UserName)</td>
+                                <td><span class="status-badge status-neutral">@(string.IsNullOrWhiteSpace(item.Action) ? "Khác" : item.Action)</span></td>
+                                <td class="content-wrap">@(string.IsNullOrWhiteSpace(item.Description) ? "Không có mô tả" : item.Description)</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                @await Html.PartialAsync("_EmptyState", new EmptyStateViewModel { Title = "Chưa có hoạt động", Message = "Các thao tác mới sẽ xuất hiện tại đây.", Icon = "≡" })
+            }
+        </div>
+    </section>
+    <aside class="col-lg-4" aria-labelledby="quickActionsTitle">
+        <div class="surface-card h-100 p-3">
+            <h2 class="h5 mb-3" id="quickActionsTitle">Thao tác nhanh</h2>
+            <div class="d-grid gap-2">
+                <a href="@Url.Action("Index", "Phong")" class="btn btn-outline-primary text-start"><span class="ui-icon" aria-hidden="true">▦</span> Mở sơ đồ phòng</a>
+                <a href="@Url.Action("Create", "HoaDon")" class="btn btn-primary text-start"><span class="ui-icon" aria-hidden="true">＋</span> Tạo phiếu nhận phòng</a>
+                <a href="@Url.Action("Index", "HoaDon")" class="btn btn-outline-primary text-start"><span class="ui-icon" aria-hidden="true">▤</span> Quản lý hóa đơn</a>
+                <a href="@Url.Action("Index", "KhachHangs")" class="btn btn-outline-secondary text-start"><span class="ui-icon" aria-hidden="true">♙</span> Tra cứu khách hàng</a>
+            </div>
+            <hr />
+            <p class="small text-muted mb-0">Check-in hôm nay: <strong class="text-dark">@Model.CheckInsToday</strong></p>
+        </div>
+    </aside>
+</div>

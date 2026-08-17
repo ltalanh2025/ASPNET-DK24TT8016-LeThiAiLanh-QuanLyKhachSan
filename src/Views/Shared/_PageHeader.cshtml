@@ -1,0 +1,23 @@
+﻿@model QLKS.Models.PageHeaderViewModel
+<header class="page-header">
+    <div class="page-header-main">
+        @if (!string.IsNullOrWhiteSpace(Model.Icon))
+        {
+            <span class="page-header-icon" aria-hidden="true">@Model.Icon</span>
+        }
+        <div class="min-w-0">
+            <h1 class="page-title">@Model.Title</h1>
+            @if (!string.IsNullOrWhiteSpace(Model.Subtitle))
+            {
+                <p class="page-subtitle">@Model.Subtitle</p>
+            }
+        </div>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Model.ActionUrl) && !string.IsNullOrWhiteSpace(Model.ActionText))
+    {
+        <a href="@Model.ActionUrl" class="btn @(string.IsNullOrWhiteSpace(Model.ActionCssClass) ? "btn-primary" : Model.ActionCssClass)">
+            @if (!string.IsNullOrWhiteSpace(Model.ActionIcon)) { <span aria-hidden="true">@Model.ActionIcon</span> }
+            @Model.ActionText
+        </a>
+    }
+</header>

@@ -1,0 +1,14 @@
+﻿@model QLKS.Models.CustomerCreateViewModel
+@using QLKS.Models
+@{ ViewBag.Title = "Thêm khách hàng"; }
+@await Html.PartialAsync("_PageHeader", new PageHeaderViewModel { Title = "Thêm khách hàng", Subtitle = "Tạo hồ sơ để sử dụng khi nhận phòng và lập hóa đơn.", Icon = "+" })
+<div class="form-shell">
+    @using (Html.BeginForm("Create", "KhachHangs", FormMethod.Post, new { @class = "surface-card p-3 p-md-4" }))
+    {
+        @Html.AntiForgeryToken()
+        @await Html.PartialAsync("_ValidationSummary")
+        <section class="form-section" aria-labelledby="customerInfoTitle"><h2 class="form-section-title" id="customerInfoTitle">Thông tin khách hàng</h2>@await Html.PartialAsync("_CustomerFormFields", Model)</section>
+        <div class="form-actions"><a href="@Url.Action("Index")" class="btn btn-outline-secondary">Hủy</a><button type="submit" class="btn btn-primary" data-loading-text="Đang lưu khách hàng...">Lưu khách hàng</button></div>
+    }
+</div>
+@section Scripts { @Scripts.Render("~/bundles/jqueryval") }

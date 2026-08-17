@@ -1,0 +1,91 @@
+@media (max-width: 1199.98px) {
+    .resort-navbar .navbar-collapse { padding-top: 1rem; }
+    .resort-navbar .nav-link { margin: 0; padding-inline: 0 !important; }
+    .resort-navbar .nav-link::after { right: 0; left: 0; }
+    .resort-nav-actions { padding-top: .75rem; align-items: flex-start; flex-wrap: wrap; border-top: 1px solid var(--customer-border); }
+    .resort-preview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .resort-service-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .customer-service-catalog { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 991.98px) {
+    .resort-hero { min-height: 720px; }
+    .resort-booking-form { grid-template-columns: repeat(2, 1fr); }
+    .resort-booking-form > .btn { width: 100%; }
+    .resort-experience-grid,
+    .resort-editorial-row,
+    .resort-editorial-row.reverse,
+    .resort-contact-grid { grid-template-columns: 1fr; }
+    .customer-introduction,
+    .customer-room-detail { grid-template-columns: 1fr; }
+    .customer-room-detail > .surface-card { border-top: 0; border-left: 1px solid var(--customer-border); }
+    .customer-room-detail-image img { min-height: 420px; }
+    .resort-editorial-row.reverse img { order: 0; }
+    .resort-room-row { grid-template-columns: 1fr; }
+    .resort-room-row.reverse .resort-room-image,
+    .resort-room-row.reverse .resort-room-copy { order: initial; }
+    .resort-footer-grid { grid-template-columns: 1.4fr 1fr 1fr 1.2fr; gap: 2rem; }
+    .resort-auth-shell { grid-template-columns: .8fr 1.2fr; }
+    .resort-auth-visual { padding: 3rem; }
+    .resort-auth-panel { padding: 2rem; }
+}
+
+@media (max-width: 991.98px) {
+    .resort-footer-grid { grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+}
+
+@media (max-width: 767.98px) {
+    .resort-container,
+    .resort-page-shell { width: min(100% - 32px, 1280px); }
+    .resort-section { padding-top: 4.5rem; padding-bottom: 4.5rem; }
+    .resort-hero { min-height: 760px; }
+    .resort-hero-content { width: calc(100% - 32px); }
+    .resort-hero h1 { font-size: clamp(2.7rem, 12vw, 4.2rem); }
+    .resort-booking-form { grid-template-columns: 1fr; }
+    .resort-section-heading { align-items: flex-start; flex-direction: column; }
+    .resort-preview-grid,
+    .resort-benefit-grid,
+    .resort-service-grid { grid-template-columns: 1fr; }
+    .resort-footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .resort-footer-grid > div:first-child { grid-column: auto; }
+    .resort-room-image img { min-height: 290px; }
+    .resort-room-booking { align-items: stretch; flex-direction: column; }
+    .resort-explore-grid { grid-template-columns: 1fr; grid-auto-rows: 230px; }
+    .resort-explore-grid article.wide { grid-column: auto; }
+    .resort-auth-shell { display: block; }
+    .resort-auth-visual { position: relative; height: 240px; min-height: 0; padding: 1.5rem; }
+    .resort-auth-visual h1 { font-size: 2.3rem; }
+    .resort-auth-visual p { display: none; }
+    .resort-auth-panel { min-height: calc(100vh - 240px); padding: 1rem; }
+    .resort-auth-card { padding: 2rem 1.25rem; }
+    .resort-auth-form-grid { grid-template-columns: 1fr; }
+    .resort-auth-field.full { grid-column: auto; }
+    .customer-service-card { grid-template-columns: 1fr; }
+    .customer-service-card > img { height: 280px; min-height: 0; }
+    .customer-contact-form-grid,
+    .customer-account-meta { grid-template-columns: 1fr; }
+    .customer-contact-form-grid .full { grid-column: auto; }
+    .customer-introduction > img { min-height: 330px; }
+    .customer-payment-countdown { align-items: flex-start; flex-direction: column; }
+}
+
+@media (max-width: 479.98px) {
+    .resort-brand { max-width: 220px; font-size: 1.05rem; }
+    .resort-navbar { min-height: 66px; }
+    .resort-hero { min-height: 800px; }
+    .resort-booking-widget { padding: .85rem; }
+    .resort-preview-card > img { height: 230px; }
+    .resort-footer-grid { grid-template-columns: 1fr; }
+    .resort-footer-grid > div:first-child { grid-column: auto; }
+    .resort-results-summary .resort-container { align-items: stretch; flex-direction: column; }
+    .resort-room-copy { padding: 1.5rem; }
+    .resort-contact-list > div { grid-template-columns: 1fr; gap: .25rem; }
+    .customer-room-actions { width: 100%; grid-auto-flow: row; }
+    .customer-room-actions .btn { width: 100%; }
+    .customer-map-area { padding: 1.25rem; align-items: flex-start; flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .resort-site *,
+    .customer-auth-site * { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}

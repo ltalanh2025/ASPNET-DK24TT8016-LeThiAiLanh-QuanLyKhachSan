@@ -1,0 +1,16 @@
+﻿@model QLKS.Data.KhachHang
+@using QLKS.Models
+@{ ViewBag.Title = "Hồ sơ khách hàng"; }
+@await Html.PartialAsync("_PageHeader", new PageHeaderViewModel { Title = string.IsNullOrWhiteSpace(Model.TenKH) ? "Hồ sơ khách hàng" : Model.TenKH, Subtitle = "Thông tin nhận diện và liên hệ của khách hàng.", Icon = "♙", ActionUrl = Url.Action("Edit", new { id = Model.MaKH }), ActionText = "Chỉnh sửa", ActionIcon = "✎", ActionCssClass = "btn-outline-primary" })
+<div class="surface-card form-shell p-3 p-md-4">
+    <dl class="detail-grid mb-0">
+        <div><dt>Họ và tên</dt><dd>@(string.IsNullOrWhiteSpace(Model.TenKH) ? "—" : Model.TenKH)</dd></div>
+        <div><dt>CCCD/CMND</dt><dd>@(string.IsNullOrWhiteSpace(Model.CCCD) ? "—" : Model.CCCD)</dd></div>
+        <div><dt>Giới tính</dt><dd>@(string.IsNullOrWhiteSpace(Model.GioiTinh) ? "—" : Model.GioiTinh)</dd></div>
+        <div><dt>Năm sinh</dt><dd>@(Model.NamSinh.HasValue ? Model.NamSinh.Value.ToString() : "—")</dd></div>
+        <div><dt>Số điện thoại</dt><dd>@(string.IsNullOrWhiteSpace(Model.DienThoai) ? "—" : Model.DienThoai)</dd></div>
+        <div><dt>Email</dt><dd class="content-wrap">@(string.IsNullOrWhiteSpace(Model.Email) ? "—" : Model.Email)</dd></div>
+        <div class="detail-grid-wide"><dt>Địa chỉ</dt><dd class="content-wrap">@(string.IsNullOrWhiteSpace(Model.DiaChi) ? "—" : Model.DiaChi)</dd></div>
+    </dl>
+    <div class="form-actions no-print"><a href="@Url.Action("Index")" class="btn btn-outline-secondary">Quay lại danh sách</a><a href="@Url.Action("Edit", new { id = Model.MaKH })" class="btn btn-primary">Chỉnh sửa hồ sơ</a></div>
+</div>
