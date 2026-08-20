@@ -1,4 +1,4 @@
-﻿@model QLKS.Models.OnlineBookingDetailsViewModel
+@model QLKS.Models.OnlineBookingDetailsViewModel
 @using QLKS.Models
 @{ Layout = "~/Views/Shared/_CustomerLayout.cshtml"; ViewBag.Title = "Đơn đặt phòng #" + Model.MaDatPhong; }
 <div class="resort-page-shell">
@@ -9,11 +9,7 @@
         @if (!string.IsNullOrWhiteSpace(Model.GhiChu)) { <div class="rounded border bg-light p-3 mt-3"><strong>Ghi chú</strong><p class="mb-0 mt-1">@Model.GhiChu</p></div> }
         @if (Model.NgayHuy.HasValue) { <div class="alert alert-warning mt-3 mb-0"><strong>Đã yêu cầu hủy @Model.NgayHuy.Value.ToString("dd/MM/yyyy HH:mm")</strong><div>@Model.LyDoHuy</div></div> }
     </div></section>
-    <aside class="surface-card booking-cost-card"><div class="card-body p-4"><h2 class="h5">Thanh toán</h2><div class="cost-line"><span>Tổng dự kiến</span><strong>@Model.TongTienDuKien.ToString("N0") VNĐ</strong></div><div class="deposit-highlight"><span>Tiền cọc 20%</span><strong>@Model.TienCoc.ToString("N0") VNĐ</strong></div><div class="cost-line"><span>Còn lại dự kiến</span><strong>@((Model.TongTienDuKien - Model.TienCoc).ToString("N0")) VNĐ</strong></div><p class="small text-muted mt-3 mb-1">Hạn thanh toán: @Model.HanThanhToan.ToString("dd/MM/yyyy HH:mm")</p>@if (!string.IsNullOrWhiteSpace(Model.TransactionCode)) { <p class="small mb-0">Mã giao dịch: <strong>@Model.TransactionCode</strong></p> }</div></aside>
+    <aside class="surface-card booking-cost-card"><div class="card-body p-4"><h2 class="h5">Chi phí</h2><div class="cost-total"><span>Tổng dự kiến</span><strong>@Model.TongTienDuKien.ToString("N0") VNĐ</strong></div><p class="small text-muted mt-3 mb-0">Thanh toán được xử lý tại quầy lễ tân khi nhận phòng.</p></div></aside>
 </div>
-@if (Model.Payments != null && Model.Payments.Any())
-{
-    <section class="surface-card data-card mt-4"><div class="p-3 border-bottom"><h2 class="h5 mb-0">Lịch sử giao dịch cọc</h2></div><div class="table-responsive"><table class="table"><thead><tr><th>Mã giao dịch</th><th>Phương thức</th><th>Thời gian</th><th class="text-end">Số tiền</th><th>Trạng thái</th></tr></thead><tbody>@foreach (var payment in Model.Payments) { <tr><td class="fw-semibold">@payment.TransactionCode</td><td>@payment.Method</td><td>@payment.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td><td class="text-end currency">@payment.Amount.ToString("N0") đ</td><td>@payment.Status</td></tr> }</tbody></table></div></section>
-}
-<div class="d-flex flex-wrap justify-content-end gap-2 mt-4"><a class="btn btn-outline-secondary" href="@Url.Action("MyBookings")">Quay lại</a>@if (OnlineBookingPresentation.CanPay(Model.TrangThai, Model.HanThanhToan, DateTime.Now)) { <a class="btn btn-success" href="@Url.Action("Payment", new { id = Model.MaDatPhong })">Thanh toán cọc</a> }@if (OnlineBookingPresentation.CanCustomerCancel(Model.TrangThai)) { <a class="btn btn-outline-danger" href="@Url.Action("Cancel", new { id = Model.MaDatPhong })">Hủy đơn</a> }</div>
+<div class="d-flex flex-wrap justify-content-end gap-2 mt-4"><a class="btn btn-outline-secondary" href="@Url.Action("MyBookings")">Quay lại</a>@if (OnlineBookingPresentation.CanCustomerCancelWithTime(Model.TrangThai, Model.NgayNhanPhong, DateTime.Now)) { <a class="btn btn-outline-danger" href="@Url.Action("Cancel", new { id = Model.MaDatPhong })">Hủy đơn</a> }</div>
 </div>

@@ -5,7 +5,7 @@
     var loggedIn = Session[SessionKeys.UserId] is int;
     var role = Convert.ToString(Session[SessionKeys.RoleName]);
     var displayName = Convert.ToString(Session[SessionKeys.DisplayName]);
-    var hotelName = AppConfig.Get("HotelName", "Quản lý khách sạn");
+    var hotelName = AppConfig.Get("HotelName", "Khách sạn");
     var homeController = role == RoleNames.Housekeeping ? "TapVu" : "Home";
     var roleDisplay = role == RoleNames.Admin ? "Quản trị viên" : role == RoleNames.Receptionist ? "Lễ tân" : role == RoleNames.Housekeeping ? "Tạp vụ" : role;
     Func<string, string> activeController = value => controller.Equals(value, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty;
@@ -45,7 +45,7 @@
                         <a class="nav-link @activeController("Phong")" href="@Url.Action("Index", "Phong")"><span class="ui-icon" aria-hidden="true">▦</span><span>Sơ đồ phòng</span></a>
                         @if (role == RoleNames.Admin || role == RoleNames.Receptionist)
                         {
-                            <a class="nav-link @activeController("KhachHangs")" href="@Url.Action("Index", "KhachHangs")"><span class="ui-icon" aria-hidden="true">♙</span><span>Khách hàng</span></a>
+                            <a class="nav-link @activeController("KhachHang")" href="@Url.Action("Index", "KhachHang")"><span class="ui-icon" aria-hidden="true">♙</span><span>Khách hàng</span></a>
                             <a class="nav-link @activeController("OnlineBookingAdmin")" href="@Url.Action("Index", "OnlineBookingAdmin")"><span class="ui-icon" aria-hidden="true">◫</span><span>Đơn online</span></a>
                             <a class="nav-link @activeController("HoaDon")" href="@Url.Action("Index", "HoaDon")"><span class="ui-icon" aria-hidden="true">▤</span><span>Hóa đơn</span></a>
                         }
@@ -115,7 +115,7 @@
                         @RenderBody()
                     </div>
                 </main>
-                <footer class="app-footer no-print">&copy; @DateTime.Now.Year @hotelName · Đồ án ASP.NET Core 8 MVC · ĐH Trà Vinh — CNTT (Lớp DK24TT8016)</footer>
+                <footer class="app-footer no-print">&copy; @DateTime.Now.Year @hotelName · Đồ án ASP.NET Core MVC · ĐH Trà Vinh — CNTT (Lớp DK24TT8016)</footer>
             </div>
         </div>
         @await Html.PartialAsync("_ConfirmModal")

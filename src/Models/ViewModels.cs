@@ -552,7 +552,6 @@ namespace QLKS.Models
         public string ImageAltText { get; set; }
         public int SoDem { get; set; }
         public decimal TongTienDuKien { get; set; }
-        public decimal TienCoc { get; set; }
         public bool ConTrongTrongKhoang { get; set; }
     }
 
@@ -684,10 +683,7 @@ namespace QLKS.Models
         public DateTime NgayTraPhong { get; set; }
         public int SoDem { get; set; }
         public decimal TongTienDuKien { get; set; }
-        public decimal TienCoc { get; set; }
         public string TrangThai { get; set; }
-        public DateTime HanThanhToan { get; set; }
-        public string TransactionCode { get; set; }
         public byte[] RowVersion { get; set; }
     }
 
@@ -695,30 +691,12 @@ namespace QLKS.Models
     {
         public int SoNguoi { get; set; }
         public decimal DonGiaTaiThoiDiemDat { get; set; }
-        public DateTime? NgayThanhToanCoc { get; set; }
         public DateTime? NgayXacNhan { get; set; }
         public string ConfirmedBy { get; set; }
         public DateTime? NgayHuy { get; set; }
         public string LyDoHuy { get; set; }
         public string GhiChu { get; set; }
         public int? MaHoaDon { get; set; }
-        public IList<DepositPaymentViewModel> Payments { get; set; }
-    }
-
-    public class DepositPaymentViewModel
-    {
-        public string TransactionCode { get; set; }
-        public decimal Amount { get; set; }
-        public string Method { get; set; }
-        public string Status { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime? PaidAt { get; set; }
-    }
-
-    public class OnlineBookingPaymentViewModel : OnlineBookingDetailsViewModel
-    {
-        public decimal DepositRatePercent { get; set; }
-        public bool CanPay { get; set; }
     }
 
     public class OnlineBookingCancelViewModel

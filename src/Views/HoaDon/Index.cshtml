@@ -59,7 +59,7 @@
                                 <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#checkoutModal-@item.MaHD">Checkout</button>
                                 <div class="modal fade text-start" id="checkoutModal-@item.MaHD" tabindex="-1" aria-labelledby="checkoutTitle-@item.MaHD" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
-                                    @using (Html.BeginForm("Checkout", "HoaDon", new { id = item.MaHD }, FormMethod.Post, new { }))
+                                    @using (Html.BeginForm("CheckOut", "HoaDon", new { id = item.MaHD }, FormMethod.Post, new { }))
                                     {
                                         @Html.AntiForgeryToken()
                                         <div class="modal-header"><h2 class="modal-title fs-5" id="checkoutTitle-@item.MaHD">Xác nhận thanh toán hóa đơn #@item.MaHD</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>

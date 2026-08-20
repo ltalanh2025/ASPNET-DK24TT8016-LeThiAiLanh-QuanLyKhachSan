@@ -5,7 +5,7 @@
 <div class="surface-card form-shell p-3 p-md-4">
     <div class="alert alert-danger"><strong>Cảnh báo:</strong> thao tác xóa không thể hoàn tác.</div>
     <dl class="row"><dt class="col-sm-4 text-muted">Khách hàng</dt><dd class="col-sm-8 fw-bold">@Model.TenKH</dd><dt class="col-sm-4 text-muted">CCCD/CMND</dt><dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.CCCD) ? "—" : Model.CCCD)</dd><dt class="col-sm-4 text-muted">Điện thoại</dt><dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.DienThoai) ? "—" : Model.DienThoai)</dd></dl>
-    @using (Html.BeginForm("Delete", "KhachHangs", new { id = Model.MaKH }, FormMethod.Post, new { @class = "form-actions", data_confirm = "true", data_confirm_title = "Xóa hồ sơ khách hàng", data_confirm_message = "Hồ sơ sẽ bị xóa vĩnh viễn nếu chưa có lịch sử hóa đơn.", data_confirm_target = Model.TenKH, data_confirm_button = "Xác nhận xóa hồ sơ", data_confirm_class = "btn-danger" }))
+    @using (Html.BeginForm("Delete", "KhachHang", new { id = Model.MaKH }, FormMethod.Post, new { @class = "form-actions", data_confirm = "true", data_confirm_title = "Xóa hồ sơ khách hàng", data_confirm_message = "Hồ sơ sẽ bị xóa vĩnh viễn nếu chưa có lịch sử hóa đơn.", data_confirm_target = Model.TenKH, data_confirm_button = "Xác nhận xóa hồ sơ", data_confirm_class = "btn-danger" }))
     {
         @Html.AntiForgeryToken()<a href="@Url.Action("Index")" class="btn btn-outline-secondary">Hủy</a><button type="submit" class="btn btn-danger" data-loading-text="Đang xóa...">Xóa hồ sơ</button>
     }

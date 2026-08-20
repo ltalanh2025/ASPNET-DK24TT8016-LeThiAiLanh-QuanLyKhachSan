@@ -2,7 +2,7 @@
 @using QLKS.Models
 @using Microsoft.AspNetCore.Routing
 @{ ViewBag.Title = "Đơn đặt phòng online"; }
-@await Html.PartialAsync("_PageHeader", new PageHeaderViewModel { Title = "Đơn đặt phòng online", Subtitle = "Xác nhận tiền cọc, xử lý hoàn cọc và chuyển đơn thành check-in.", Icon = "◫" })
+@await Html.PartialAsync("_PageHeader", new PageHeaderViewModel { Title = "Đơn đặt phòng online", Subtitle = "Xác nhận, từ chối đơn và chuyển đơn thành check-in.", Icon = "◫" })
 <form method="get" action="@Url.Action("Index")" class="surface-card filter-card" role="search">
     <div class="row g-2 align-items-end">
         <div class="col-lg-7"><label class="form-label" for="q">Tìm kiếm</label><input class="form-control" id="q" name="q" value="@Model.Search" placeholder="Nhập mã đơn (#101), tên khách, email, SĐT hoặc số phòng..." /></div>
@@ -14,10 +14,10 @@
 @if (Model.Results.Items != null && Model.Results.Items.Any())
 {
     <div class="d-flex justify-content-between p-3 border-bottom"><span class="result-summary">Hiển thị @Model.Results.Items.Count / @Model.Results.TotalItems đơn</span></div>
-    <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Phòng</th><th>Lưu trú</th><th class="text-end">Cọc</th><th class="text-center">Trạng thái</th><th class="text-end">Thao tác</th></tr></thead><tbody>
+    <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Phòng</th><th>Lưu trú</th><th class="text-end">Tổng</th><th class="text-center">Trạng thái</th><th class="text-end">Thao tác</th></tr></thead><tbody>
     @foreach (var item in Model.Results.Items)
     {
-        <tr><td><a class="fw-bold text-decoration-none" href="@Url.Action("Details", new { id = item.MaDatPhong })">#@item.MaDatPhong</a><small class="d-block text-muted">@item.NgayDat.ToString("dd/MM HH:mm")</small></td><td><strong>@item.CustomerName</strong><small class="d-block text-muted">@item.CustomerEmail</small><small class="d-block text-muted">@item.CustomerPhone</small></td><td>Phòng <strong>@item.RoomNumber</strong></td><td class="nowrap">@item.NgayNhanPhong.ToString("dd/MM/yyyy") – @item.NgayTraPhong.ToString("dd/MM/yyyy")<small class="d-block text-muted">@item.SoDem đêm</small></td><td class="text-end"><strong class="currency">@item.TienCoc.ToString("N0") đ</strong><small class="d-block text-muted">Tổng @item.TongTienDuKien.ToString("N0") đ</small></td><td class="text-center">@await Html.PartialAsync("_StatusBadge", new StatusBadgeViewModel { Text = OnlineBookingPresentation.Label(item.TrangThai), CssClass = OnlineBookingPresentation.CssClass(item.TrangThai), Icon = OnlineBookingPresentation.Icon(item.TrangThai) })</td><td class="text-end"><a class="btn btn-sm btn-outline-primary" href="@Url.Action("Details", new { id = item.MaDatPhong })">Xử lý</a></td></tr>
+        <tr><td><a class="fw-bold text-decoration-none" href="@Url.Action("Details", new { id = item.MaDatPhong })">#@item.MaDatPhong</a><small class="d-block text-muted">@item.NgayDat.ToString("dd/MM HH:mm")</small></td><td><strong>@item.CustomerName</strong><small class="d-block text-muted">@item.CustomerEmail</small><small class="d-block text-muted">@item.CustomerPhone</small></td><td>Phòng <strong>@item.RoomNumber</strong></td><td class="nowrap">@item.NgayNhanPhong.ToString("dd/MM/yyyy") – @item.NgayTraPhong.ToString("dd/MM/yyyy")<small class="d-block text-muted">@item.SoDem đêm</small></td><td class="text-end"><strong class="currency">@item.TongTienDuKien.ToString("N0") đ</strong></td><td class="text-center">@await Html.PartialAsync("_StatusBadge", new StatusBadgeViewModel { Text = OnlineBookingPresentation.Label(item.TrangThai), CssClass = OnlineBookingPresentation.CssClass(item.TrangThai), Icon = OnlineBookingPresentation.Icon(item.TrangThai) })</td><td class="text-end"><a class="btn btn-sm btn-outline-primary" href="@Url.Action("Details", new { id = item.MaDatPhong })">Xử lý</a></td></tr>
     }
     </tbody></table></div>
     @await Html.PartialAsync("_Pagination", new PaginationViewModel { CurrentPage = Model.Results.CurrentPage, TotalPages = Model.Results.TotalPages, TotalItems = Model.Results.TotalItems, Action = "Index", Controller = "OnlineBookingAdmin", RouteValues = new RouteValueDictionary(new { q = Model.Search, trangThai = Model.Status }) })

@@ -127,7 +127,7 @@ namespace QLKS.Controllers
                 CCCD = customer.CCCD,
                 DiaChi = customer.DiaChi
             };
-            ApplyProfileMetadata(model);
+            ApplyProfileMetadata(model, customer);
             return View(model);
         }
 
@@ -146,7 +146,7 @@ namespace QLKS.Controllers
                 ModelState.AddModelError("CCCD", "CCCD này đã tồn tại.");
             if (!ModelState.IsValid)
             {
-                ApplyProfileMetadata(model);
+                ApplyProfileMetadata(model, customer);
                 return View(model);
             }
 
@@ -162,7 +162,7 @@ namespace QLKS.Controllers
             catch (DbUpdateException)
             {
                 ModelState.AddModelError(string.Empty, "Không thể cập nhật vì email hoặc CCCD vừa được sử dụng.");
-                ApplyProfileMetadata(model);
+                ApplyProfileMetadata(model, customer);
                 return View(model);
             }
 
@@ -229,10 +229,10 @@ namespace QLKS.Controllers
             return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
         }
 
-        private static void ApplyProfileMetadata(CustomerProfileViewModel model)
+        private static void ApplyProfileMetadata(CustomerProfileViewModel model, KhachHang customer)
         {
             if (model == null) return;
-            model.NgayTaoTaiKhoan = null;
+            model.NgayTaoTaiKhoan = customer == null ? (DateTime?)null : customer.NgayTao;
             model.TrangThaiTaiKhoan = "Đang sử dụng";
         }
 

@@ -24,12 +24,10 @@ namespace QLKS.Controllers
         {
             const int pageSize = 15;
             page = Math.Max(1, page);
-            bookingService.ExpirePendingBookings(DateTime.Now);
 
             var query = db.DatPhongOnlines
                 .Include(x => x.KhachHang)
                 .Include(x => x.Phong)
-                .Include(x => x.ThanhToanCocs)
                 .AsQueryable();
 
             var search = Normalize(q);
@@ -74,7 +72,6 @@ namespace QLKS.Controllers
 
         public ActionResult Details(int id)
         {
-            bookingService.ExpirePendingBookings(DateTime.Now);
             var booking = LoadBooking(id);
             return booking == null ? (ActionResult)HttpNotFound() : View(OnlineBookingViewModelFactory.ToDetails(booking));
         }
@@ -99,14 +96,6 @@ namespace QLKS.Controllers
 
             return RunAction(model, (id, employeeId, version) =>
                 bookingService.RejectByEmployee(id, employeeId, model.Reason, version, DateTime.Now));
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Refund(OnlineBookingAdminActionViewModel model)
-        {
-            return RunAction(model, (id, employeeId, version) =>
-                bookingService.RefundByEmployee(id, employeeId, version, DateTime.Now));
         }
 
         [HttpPost]
@@ -149,7 +138,6 @@ namespace QLKS.Controllers
                 .Include(x => x.KhachHang)
                 .Include(x => x.Phong.LoaiPhong)
                 .Include(x => x.NhanVien)
-                .Include(x => x.ThanhToanCocs)
                 .FirstOrDefault(x => x.MaDatPhong == id);
         }
 

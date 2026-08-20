@@ -45,7 +45,7 @@
                             <a href="@Url.Action("Edit", new { id = item.MaNV })" class="btn btn-sm btn-outline-primary">Chỉnh sửa</a>
                             @if (isActive && item.MaNV != currentUserId)
                             {
-                                using (Html.BeginForm("Lock", "NhanVien", new { id = item.MaNV }, FormMethod.Post, new { @class = "d-inline", data_confirm = "true", data_confirm_title = "Khóa tài khoản nhân viên", data_confirm_message = "Nhân viên sẽ không thể đăng nhập cho đến khi được mở khóa trong trang chỉnh sửa.", data_confirm_target = item.TenNV + " (" + item.TenDangNhap + ")", data_confirm_button = "Xác nhận khóa tài khoản", data_confirm_class = "btn-danger" }))
+                                using (Html.BeginForm("ToggleStatus", "NhanVien", new { id = item.MaNV }, FormMethod.Post, new { @class = "d-inline", data_confirm = "true", data_confirm_title = "Khóa/Mở khóa tài khoản nhân viên", data_confirm_message = "Chuyển trạng thái hoạt động của tài khoản nhân viên.", data_confirm_target = item.TenNV + " (" + item.TenDangNhap + ")", data_confirm_button = "Xác nhận", data_confirm_class = "btn-danger" }))
                                 {
                                     @Html.AntiForgeryToken()<button type="submit" class="btn btn-sm btn-outline-danger" data-loading-text="Đang khóa...">Khóa tài khoản</button>
                                 }

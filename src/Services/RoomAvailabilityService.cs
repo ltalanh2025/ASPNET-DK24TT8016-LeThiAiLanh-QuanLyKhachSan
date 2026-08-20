@@ -43,8 +43,7 @@ namespace QLKS.Services
                 x.MaPhong == roomId &&
                 (!excludedBookingId.HasValue || x.MaDatPhong != excludedBookingId.Value) &&
                 x.NgayNhanPhong < to && x.NgayTraPhong > from &&
-                ((x.TrangThai == OnlineBookingStatus.PendingPayment && x.HanThanhToan >= now) ||
-                 x.TrangThai == OnlineBookingStatus.Deposited ||
+                (x.TrangThai == OnlineBookingStatus.PendingConfirmation ||
                  x.TrangThai == OnlineBookingStatus.Confirmed));
 
             if (hasBookingConflict) return false;
@@ -60,7 +59,7 @@ namespace QLKS.Services
         public bool LockRoom(int roomId)
         {
             var lockedId = db.Database.SqlQueryRaw<int>(
-                "SELECT MaPhong FROM dbo.tblPhong WITH (UPDLOCK, HOLDLOCK) WHERE MaPhong = {0}", roomId)
+                "SELECT MaPhong AS Value FROM dbo.tblPhong WITH (UPDLOCK, HOLDLOCK) WHERE MaPhong = {0}", roomId)
                 .SingleOrDefault();
             return lockedId == roomId && lockedId != default;
         }

@@ -1,4 +1,5 @@
 using System;
+using QLKS.Data;
 using QLKS.Infrastructure;
 
 namespace QLKS.Services
@@ -9,14 +10,10 @@ namespace QLKS.Services
         {
             switch (status)
             {
-                case OnlineBookingStatus.PendingPayment: return "Chờ thanh toán";
-                case OnlineBookingStatus.Deposited: return "Đã đặt cọc";
+                case OnlineBookingStatus.PendingConfirmation: return "Chờ xác nhận";
                 case OnlineBookingStatus.Confirmed: return "Đã xác nhận";
                 case OnlineBookingStatus.Cancelled: return "Đã hủy";
-                case OnlineBookingStatus.Expired: return "Hết hạn";
                 case OnlineBookingStatus.CheckedIn: return "Đã check-in";
-                case OnlineBookingStatus.RefundPending: return "Chờ hoàn cọc";
-                case OnlineBookingStatus.Refunded: return "Đã hoàn cọc";
                 default: return string.IsNullOrWhiteSpace(status) ? "Không xác định" : status;
             }
         }
@@ -25,14 +22,10 @@ namespace QLKS.Services
         {
             switch (status)
             {
-                case OnlineBookingStatus.PendingPayment: return "status-warning";
-                case OnlineBookingStatus.Deposited: return "status-info";
+                case OnlineBookingStatus.PendingConfirmation: return "status-warning";
                 case OnlineBookingStatus.Confirmed: return "status-success";
                 case OnlineBookingStatus.CheckedIn: return "status-primary";
-                case OnlineBookingStatus.RefundPending: return "status-warning";
-                case OnlineBookingStatus.Refunded: return "status-neutral";
-                case OnlineBookingStatus.Cancelled:
-                case OnlineBookingStatus.Expired: return "status-danger";
+                case OnlineBookingStatus.Cancelled: return "status-danger";
                 default: return "status-neutral";
             }
         }
@@ -41,28 +34,29 @@ namespace QLKS.Services
         {
             switch (status)
             {
-                case OnlineBookingStatus.PendingPayment: return "⌛";
-                case OnlineBookingStatus.Deposited: return "₫";
+                case OnlineBookingStatus.PendingConfirmation: return "⌛";
                 case OnlineBookingStatus.Confirmed: return "✓";
                 case OnlineBookingStatus.CheckedIn: return "●";
-                case OnlineBookingStatus.RefundPending: return "↻";
-                case OnlineBookingStatus.Refunded: return "↩";
                 case OnlineBookingStatus.Cancelled: return "×";
-                case OnlineBookingStatus.Expired: return "!";
                 default: return "•";
             }
         }
 
         public static bool CanCustomerCancel(string status)
         {
-            return status == OnlineBookingStatus.PendingPayment ||
-                   status == OnlineBookingStatus.Deposited ||
+            return status == OnlineBookingStatus.PendingConfirmation ||
                    status == OnlineBookingStatus.Confirmed;
         }
 
-        public static bool CanPay(string status, DateTime deadline, DateTime now)
+        public static bool CanCustomerCancelWithTime(DatPhongOnline booking, DateTime now)
         {
-            return status == OnlineBookingStatus.PendingPayment && deadline >= now;
+            return CanCustomerCancelWithTime(booking.TrangThai, booking.NgayNhanPhong, now);
+        }
+
+        public static bool CanCustomerCancelWithTime(string status, DateTime ngayNhanPhong, DateTime now)
+        {
+            return CanCustomerCancel(status) &&
+                   now < ngayNhanPhong.AddHours(-OnlineBookingPolicy.CancelDeadlineHours);
         }
     }
 

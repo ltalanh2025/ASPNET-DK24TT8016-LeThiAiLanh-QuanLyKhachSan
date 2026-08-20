@@ -2,7 +2,6 @@
 @{ Layout = "~/Views/Shared/_CustomerLayout.cshtml"; ViewBag.Title = "Hủy đơn đặt phòng"; }
 <div class="resort-page-shell">
 <div class="customer-auth-card surface-card"><div class="card-body p-4 p-md-5"><span class="eyebrow">Yêu cầu hủy</span><h1 class="h3 mt-2">Hủy đơn #@Model.MaDatPhong</h1><p class="text-muted">@(Model.Booking == null ? "" : "Phòng " + Model.Booking.RoomNumber + " · " + Model.Booking.NgayNhanPhong.ToString("dd/MM/yyyy") + " – " + Model.Booking.NgayTraPhong.ToString("dd/MM/yyyy"))</p>
-    @if (Model.Booking != null && (Model.Booking.TrangThai == QLKS.Infrastructure.OnlineBookingStatus.Deposited || Model.Booking.TrangThai == QLKS.Infrastructure.OnlineBookingStatus.Confirmed)) { <div class="alert alert-warning">Đơn đã đặt cọc. Sau khi hủy, đơn sẽ chuyển sang <strong>Chờ hoàn cọc</strong> để nhân viên xử lý; hệ thống không tự đánh dấu đã hoàn tiền.</div> }
     @await Html.PartialAsync("_ValidationSummary")
     @using (Html.BeginForm("Cancel", "OnlineBooking", FormMethod.Post, new { data_confirm = "", data_confirm_title = "Xác nhận hủy đơn", data_confirm_message = "Bạn chắc chắn muốn hủy đơn đặt phòng này?", data_confirm_target = "Đơn #" + Model.MaDatPhong, data_confirm_button = "Hủy đơn", data_confirm_class = "btn-danger" }))
     {

@@ -6,18 +6,16 @@
     var room = Model.Room;
     var customer = Model.Customer;
     var image = room == null || string.IsNullOrWhiteSpace(room.AnhDaiDien) ? ImageUploadService.DefaultImage : room.AnhDaiDien;
-    var remaining = room == null ? 0 : room.TongTienDuKien - room.TienCoc;
 }
 <div class="resort-page-shell">
     <div class="booking-two-column customer-booking-confirmation">
         <section class="surface-card">
             <div class="customer-booking-room-image"><img src="@Url.Content("~/Content/Images/" + image)" data-image-fallback="@Url.Content("~/Content/Images/" + ImageUploadService.DefaultImage)" alt="@(room == null ? "Ảnh phòng" : "Ảnh phòng " + room.SoPhong + " - " + room.TenLoai)" /></div>
             <div class="card-body p-4 p-lg-5">
-                <span class="eyebrow">Bước 1/2</span>
                 <h1 class="h3 mt-2">Xác nhận thông tin đặt phòng</h1>
                 <p class="text-muted">Hệ thống sẽ đọc lại giá, sức chứa và lịch phòng ngay khi bạn xác nhận.</p>
                 @await Html.PartialAsync("_ValidationSummary")
-                @using (Html.BeginForm("Create", "OnlineBooking", FormMethod.Post, new { data_confirm = "", data_confirm_title = "Tạo đơn giữ chỗ", data_confirm_message = "Tạo đơn và giữ phòng trong 15 phút để thanh toán cọc?", data_confirm_button = "Tiếp tục thanh toán", data_confirm_class = "btn-primary" }))
+                @using (Html.BeginForm("Create", "OnlineBooking", FormMethod.Post, new { data_confirm = "", data_confirm_title = "Gửi yêu cầu đặt phòng", data_confirm_message = "Gửi yêu cầu đặt phòng này? Đơn sẽ chờ nhân viên xác nhận.", data_confirm_button = "Gửi yêu cầu", data_confirm_class = "btn-primary" }))
                 {
                     @Html.AntiForgeryToken()
                     @Html.HiddenFor(x => x.MaPhong)
@@ -47,15 +45,15 @@
                     <div class="customer-booking-policies mt-4">
                         <h2 class="h5">Chính sách đặt và hủy phòng</h2>
                         <ul>
-                            <li>Đơn được giữ trong thời hạn thanh toán do hệ thống hiển thị ở bước tiếp theo.</li>
-                            <li>Tiền cọc bằng 20% tổng tiền dự kiến; số tiền còn lại được xử lý theo nghiệp vụ khách sạn.</li>
-                            <li>Việc hủy chỉ khả dụng ở các trạng thái backend đang cho phép. Đơn đã cọc có thể chuyển sang chờ hoàn cọc.</li>
+                            <li>Đơn đặt phòng được gửi ở trạng thái "Chờ xác nhận" và chờ nhân viên xác nhận.</li>
+                            <li>Bạn có thể hủy đơn trước thời điểm nhận phòng ít nhất 12 giờ.</li>
+                            <li>Việc hủy chỉ khả dụng ở các trạng thái backend đang cho phép.</li>
                         </ul>
                         <div class="form-check mt-3">@Html.CheckBoxFor(x => x.XacNhanChinhSach, new { @class = "form-check-input", required = "required", data_val = "true", data_val_required = "Bạn cần xác nhận chính sách đặt phòng." })@Html.LabelFor(x => x.XacNhanChinhSach, new { @class = "form-check-label" })</div>
                         @Html.ValidationMessageFor(x => x.XacNhanChinhSach, "", new { @class = "text-danger small d-block" })
                     </div>
 
-                    <div class="form-actions"><a class="btn btn-outline-secondary" href="@Url.Action("Search")">Chọn lại</a><button type="submit" class="btn resort-btn-primary" data-loading-text="Đang giữ phòng...">Tiếp tục thanh toán</button></div>
+                    <div class="form-actions"><a class="btn btn-outline-secondary" href="@Url.Action("Search")">Chọn lại</a><button type="submit" class="btn resort-btn-primary" data-loading-text="Đang gửi yêu cầu...">Gửi yêu cầu đặt phòng</button></div>
                 }
             </div>
         </section>
@@ -66,10 +64,8 @@
                 {
                     <div class="cost-line"><span>@room.GiaMoiDem.ToString("N0") VNĐ × @room.SoDem đêm</span><strong>@room.TongTienDuKien.ToString("N0") VNĐ</strong></div>
                     <div class="cost-total"><span>Tổng dự kiến</span><strong>@room.TongTienDuKien.ToString("N0") VNĐ</strong></div>
-                    <div class="deposit-highlight"><span>Cọc cần thanh toán (20%)</span><strong>@room.TienCoc.ToString("N0") VNĐ</strong></div>
-                    <div class="cost-line"><span>Còn lại dự kiến</span><strong>@remaining.ToString("N0") VNĐ</strong></div>
                 }
-                <p class="small text-muted mt-3 mb-0">Các con số chỉ để hiển thị. Server sẽ đọc lại đơn giá từ database, tính số đêm, tổng tiền và cọc 20% khi nhận POST.</p>
+                <p class="small text-muted mt-3 mb-0">Các con số chỉ để hiển thị. Server sẽ đọc lại đơn giá từ database, tính số đêm và tổng tiền khi nhận POST.</p>
             </div>
         </aside>
     </div>

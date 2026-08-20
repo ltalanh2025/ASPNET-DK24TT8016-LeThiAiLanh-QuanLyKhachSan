@@ -48,7 +48,8 @@
 .stat-link { position: absolute; inset: 0; border-radius: inherit; }
 .stat-link:focus-visible { box-shadow: inset var(--focus-ring); outline: 0; }
 
-.data-card { overflow: hidden; }
+.data-card { overflow: visible; }
+.data-card .table-responsive { overflow: visible; scrollbar-color: #cbd5e1 transparent; border-radius: var(--border-radius); }
 .table-responsive { scrollbar-color: #cbd5e1 transparent; }
 .table { margin-bottom: 0; color: var(--text-primary); }
 .table > :not(caption) > * > * { padding: .85rem .9rem; border-bottom-color: #e9eef5; }

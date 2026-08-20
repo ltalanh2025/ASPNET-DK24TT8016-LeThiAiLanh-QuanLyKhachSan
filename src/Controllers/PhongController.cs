@@ -220,6 +220,20 @@ namespace QLKS.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
+        [RoleAuthorize(RoleNames.Admin, RoleNames.Receptionist, RoleNames.Housekeeping)]
+        [ValidateAntiForgeryToken]
+        public ActionResult ResetPhong(int id)
+        {
+            var room = db.Phongs.Find(id);
+            if (room == null) return HttpNotFound();
+            room.TrangThai = RoomStatus.Available;
+            AuditLogService.Write(db, CurrentUserId, "Reset trạng thái phòng", "Chuyển phòng " + room.SoPhong + " về trạng thái Trống.");
+            db.SaveChanges();
+            TempData["Success"] = "Đã reset phòng " + room.SoPhong + " về trạng thái Trống.";
+            return RedirectToAction("Index");
+        }
+
         private void ValidateRoom(string roomNumber, int? roomTypeId, int? roomId)
         {
             if (string.IsNullOrWhiteSpace(roomNumber)) return;

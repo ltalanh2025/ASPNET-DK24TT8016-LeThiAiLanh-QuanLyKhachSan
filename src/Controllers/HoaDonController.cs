@@ -22,7 +22,7 @@ namespace QLKS.Controllers
             page = Math.Max(1, page);
             var query = db.HoaDons
                 .Include(x => x.KhachHang)
-                .Include(x => x.ChiTietHoaDons.Select(y => y.Phong))
+                .Include(x => x.ChiTietHoaDons).ThenInclude(y => y.Phong)
                 .Include(x => x.ChiTietDichVus)
                 .AsQueryable();
 
@@ -215,7 +215,7 @@ namespace QLKS.Controllers
         public ActionResult CheckOut(int id)
         {
             var invoice = db.HoaDons
-                .Include(x => x.ChiTietHoaDons.Select(y => y.Phong))
+                .Include(x => x.ChiTietHoaDons).ThenInclude(y => y.Phong)
                 .Include(x => x.ChiTietDichVus)
                 .FirstOrDefault(x => x.MaHD == id);
             if (invoice == null) return HttpNotFound();
@@ -255,8 +255,8 @@ namespace QLKS.Controllers
                 .Include(x => x.KhachHang)
                 .Include(x => x.NhanVien)
                 .Include(x => x.TinhTrangHoaDon)
-                .Include(x => x.ChiTietHoaDons.Select(y => y.Phong.LoaiPhong))
-                .Include(x => x.ChiTietDichVus.Select(y => y.DichVu))
+                .Include(x => x.ChiTietHoaDons).ThenInclude(y => y.Phong.LoaiPhong)
+                .Include(x => x.ChiTietDichVus).ThenInclude(y => y.DichVu)
                 .FirstOrDefault(x => x.MaHD == id);
         }
 

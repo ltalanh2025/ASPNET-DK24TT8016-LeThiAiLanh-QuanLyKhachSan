@@ -3,7 +3,7 @@
 @{ ViewBag.Title = "Sửa khách hàng"; }
 @await Html.PartialAsync("_PageHeader", new PageHeaderViewModel { Title = "Chỉnh sửa khách hàng", Subtitle = "Cập nhật thông tin liên hệ và giấy tờ của khách hàng.", Icon = "✎" })
 <div class="form-shell">
-    @using (Html.BeginForm("Edit", "KhachHangs", FormMethod.Post, new { @class = "surface-card p-3 p-md-4" }))
+    @using (Html.BeginForm("Edit", "KhachHang", FormMethod.Post, new { @class = "surface-card p-3 p-md-4" }))
     {
         @Html.AntiForgeryToken()
         @Html.HiddenFor(x => x.MaKH)

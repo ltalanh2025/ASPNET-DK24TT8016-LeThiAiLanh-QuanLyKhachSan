@@ -43,7 +43,6 @@ namespace QLKS.Controllers
         [AllowAnonymous]
         public ActionResult AvailableRooms(RoomSearchViewModel model)
         {
-            bookingService.ExpirePendingBookings(DateTime.Now);
             if (!TryValidateModel(model)) return View("Search", model);
 
             var checkIn = model.NgayNhanPhong.Value.Date;
@@ -57,7 +56,6 @@ namespace QLKS.Controllers
         [AllowAnonymous]
         public ActionResult RoomDetails(int maPhong, DateTime ngayNhanPhong, DateTime ngayTraPhong, int soNguoi)
         {
-            bookingService.ExpirePendingBookings(DateTime.Now);
             var search = new RoomSearchViewModel
             {
                 NgayNhanPhong = ngayNhanPhong.Date,
@@ -89,7 +87,6 @@ namespace QLKS.Controllers
         [CustomerAuthorize]
         public ActionResult Create(int maPhong, DateTime ngayNhanPhong, DateTime ngayTraPhong, int soNguoi)
         {
-            bookingService.ExpirePendingBookings(DateTime.Now);
             var search = new RoomSearchViewModel
             {
                 NgayNhanPhong = ngayNhanPhong.Date,
@@ -150,66 +147,12 @@ namespace QLKS.Controllers
             }
 
             TempData["Success"] = result.Message;
-            return RedirectToAction("Payment", new { id = result.Value.MaDatPhong });
-        }
-
-        [CustomerAuthorize]
-        public ActionResult Payment(int id)
-        {
-            bookingService.ExpirePendingBookings(DateTime.Now);
-            var booking = LoadCustomerBooking(id);
-            if (booking == null) return HttpNotFound();
-
-            var details = OnlineBookingViewModelFactory.ToDetails(booking);
-            var model = new OnlineBookingPaymentViewModel
-            {
-                MaDatPhong = details.MaDatPhong,
-                MaKH = details.MaKH,
-                CustomerName = details.CustomerName,
-                CustomerEmail = details.CustomerEmail,
-                CustomerPhone = details.CustomerPhone,
-                RoomNumber = details.RoomNumber,
-                NgayDat = details.NgayDat,
-                NgayNhanPhong = details.NgayNhanPhong,
-                NgayTraPhong = details.NgayTraPhong,
-                SoDem = details.SoDem,
-                TongTienDuKien = details.TongTienDuKien,
-                TienCoc = details.TienCoc,
-                TrangThai = details.TrangThai,
-                HanThanhToan = details.HanThanhToan,
-                TransactionCode = details.TransactionCode,
-                RowVersion = details.RowVersion,
-                SoNguoi = details.SoNguoi,
-                DonGiaTaiThoiDiemDat = details.DonGiaTaiThoiDiemDat,
-                NgayThanhToanCoc = details.NgayThanhToanCoc,
-                NgayXacNhan = details.NgayXacNhan,
-                ConfirmedBy = details.ConfirmedBy,
-                NgayHuy = details.NgayHuy,
-                LyDoHuy = details.LyDoHuy,
-                GhiChu = details.GhiChu,
-                MaHoaDon = details.MaHoaDon,
-                Payments = details.Payments,
-                DepositRatePercent = OnlineBookingPolicy.DepositRate * 100m,
-                CanPay = OnlineBookingPresentation.CanPay(booking.TrangThai, booking.HanThanhToan, DateTime.Now)
-            };
-            return View(model);
-        }
-
-        [HttpPost]
-        [CustomerAuthorize]
-        [ValidateAntiForgeryToken]
-        public ActionResult ProcessPayment(int id, bool simulateSuccess = true)
-        {
-            var customerId = (int)Session[CustomerSessionKeys.CustomerId];
-            var result = bookingService.ProcessPayment(id, customerId, simulateSuccess, DateTime.Now);
-            TempData[result.Succeeded ? "Success" : "Error"] = result.Message;
-            return RedirectToAction("Details", new { id });
+            return RedirectToAction("Details", new { id = result.Value.MaDatPhong });
         }
 
         [CustomerAuthorize]
         public ActionResult Details(int id)
         {
-            bookingService.ExpirePendingBookings(DateTime.Now);
             var booking = LoadCustomerBooking(id);
             if (booking == null) return HttpNotFound();
             return View(OnlineBookingViewModelFactory.ToDetails(booking));
@@ -218,12 +161,10 @@ namespace QLKS.Controllers
         [CustomerAuthorize]
         public ActionResult MyBookings()
         {
-            bookingService.ExpirePendingBookings(DateTime.Now);
             var customerId = (int)Session[CustomerSessionKeys.CustomerId];
             var bookings = db.DatPhongOnlines
                 .Include(x => x.KhachHang)
                 .Include(x => x.Phong)
-                .Include(x => x.ThanhToanCocs)
                 .Where(x => x.MaKH == customerId)
                 .OrderByDescending(x => x.NgayDat)
                 .ToList()
@@ -235,12 +176,11 @@ namespace QLKS.Controllers
         [CustomerAuthorize]
         public ActionResult Cancel(int id)
         {
-            bookingService.ExpirePendingBookings(DateTime.Now);
             var booking = LoadCustomerBooking(id);
             if (booking == null) return HttpNotFound();
-            if (!OnlineBookingPresentation.CanCustomerCancel(booking.TrangThai))
+            if (!OnlineBookingPresentation.CanCustomerCancelWithTime(booking, DateTime.Now))
             {
-                TempData["Error"] = "Đơn không ở trạng thái có thể hủy.";
+                TempData["Error"] = "Đơn không ở trạng thái có thể hủy, hoặc đã quá thời hạn hủy (cần trước thời điểm nhận phòng ít nhất " + OnlineBookingPolicy.CancelDeadlineHours + " giờ).";
                 return RedirectToAction("Details", new { id });
             }
 
@@ -297,7 +237,6 @@ namespace QLKS.Controllers
                 .Include(x => x.KhachHang)
                 .Include(x => x.Phong.LoaiPhong)
                 .Include(x => x.NhanVien)
-                .Include(x => x.ThanhToanCocs)
                 .FirstOrDefault(x => x.MaDatPhong == id && x.MaKH == customerId);
         }
 
@@ -324,7 +263,6 @@ namespace QLKS.Controllers
                 ImageAltText = roomGallery?.ImageAltText ?? ("Ảnh phòng " + room.SoPhong),
                 SoDem = nights,
                 TongTienDuKien = total,
-                TienCoc = decimal.Round(total * OnlineBookingPolicy.DepositRate, 2, MidpointRounding.AwayFromZero),
                 ConTrongTrongKhoang = true
             };
         }

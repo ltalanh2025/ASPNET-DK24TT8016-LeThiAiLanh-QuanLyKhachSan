@@ -25,7 +25,7 @@
                     <div><dt>Tiện nghi</dt><dd>Theo mô tả và tiêu chuẩn loại phòng @room.TenLoai</dd></div>
                     <div><dt>Giá mỗi đêm</dt><dd>@room.GiaMoiDem.ToString("N0") VNĐ</dd></div>
                 </dl>
-                <div class="deposit-highlight mt-4"><span>Tổng dự kiến · cọc 20%</span><strong>@room.TongTienDuKien.ToString("N0") VNĐ · @room.TienCoc.ToString("N0") VNĐ</strong></div>
+                <div class="deposit-highlight mt-4"><span>Tổng dự kiến</span><strong>@room.TongTienDuKien.ToString("N0") VNĐ</strong></div>
                 <div class="form-actions">
                     <a class="btn btn-outline-secondary" href="@Url.Action("AvailableRooms", new { ngayNhanPhong = Model.Search.NgayNhanPhong.Value.ToString("yyyy-MM-dd"), ngayTraPhong = Model.Search.NgayTraPhong.Value.ToString("yyyy-MM-dd"), soNguoi = Model.Search.SoNguoi })">Quay lại danh sách</a>
                     <a class="btn resort-btn-primary" href="@Url.Action("Create", new { maPhong = room.MaPhong, ngayNhanPhong = Model.Search.NgayNhanPhong.Value.ToString("yyyy-MM-dd"), ngayTraPhong = Model.Search.NgayTraPhong.Value.ToString("yyyy-MM-dd"), soNguoi = Model.Search.SoNguoi })">Đặt phòng này</a>

@@ -39,33 +39,19 @@ namespace QLKS.Infrastructure
 
     public static class OnlineBookingStatus
     {
-        public const string PendingPayment = "ChoThanhToan";
-        public const string Deposited = "DaDatCoc";
+        public const string PendingConfirmation = "ChoXacNhan";
         public const string Confirmed = "DaXacNhan";
         public const string Cancelled = "DaHuy";
-        public const string Expired = "HetHan";
         public const string CheckedIn = "DaCheckIn";
-        public const string RefundPending = "ChoHoanCoc";
-        public const string Refunded = "DaHoanCoc";
 
         public static readonly string[] All =
         {
-            PendingPayment, Deposited, Confirmed, Cancelled,
-            Expired, CheckedIn, RefundPending, Refunded
+            PendingConfirmation, Confirmed, Cancelled, CheckedIn
         };
-    }
-
-    public static class DepositPaymentStatus
-    {
-        public const string Pending = "ChoThanhToan";
-        public const string Succeeded = "ThanhCong";
-        public const string Failed = "ThatBai";
-        public const string Refunded = "DaHoanTien";
     }
 
     public static class OnlineBookingPolicy
     {
-        public const decimal DepositRate = 0.20m;
-        public const int PaymentWindowMinutes = 15;
+        public const int CancelDeadlineHours = 12;
     }
 }

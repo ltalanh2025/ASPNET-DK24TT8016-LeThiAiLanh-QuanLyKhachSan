@@ -24,6 +24,7 @@ namespace QLKS.Data
         public string Email { get; set; }
         public string DiaChi { get; set; }
         public string MatKhau { get; set; }
+        public System.DateTime NgayTao { get; set; }
     
         public virtual ICollection<HoaDon> HoaDons { get; set; }
         public virtual ICollection<DatPhongOnline> DatPhongOnlines { get; set; }

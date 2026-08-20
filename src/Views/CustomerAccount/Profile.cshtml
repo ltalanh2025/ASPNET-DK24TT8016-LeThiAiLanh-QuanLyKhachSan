@@ -4,7 +4,7 @@
 <div class="customer-form-card surface-card"><div class="card-body p-4 p-md-5">
     <div class="d-flex flex-column flex-sm-row justify-content-between gap-3 mb-4"><div><span class="eyebrow">Tài khoản</span><h1 class="h3 mt-2 mb-1">Thông tin cá nhân</h1><p class="text-muted mb-0">Cập nhật thông tin dùng cho các đơn đặt phòng.</p></div><a class="btn btn-outline-primary align-self-sm-start" href="@Url.Action("ChangePassword")">Đổi mật khẩu</a></div>
     <dl class="customer-account-meta">
-        <div><dt>Ngày tạo tài khoản</dt><dd>@(Model.NgayTaoTaiKhoan.HasValue ? Model.NgayTaoTaiKhoan.Value.ToString("dd/MM/yyyy HH:mm") : "Chưa có trường dữ liệu trong database hiện tại")</dd></div>
+        <div><dt>Ngày tạo tài khoản</dt><dd>@(Model.NgayTaoTaiKhoan.HasValue ? Model.NgayTaoTaiKhoan.Value.ToString("dd/MM/yyyy HH:mm") : "—")</dd></div>
         <div><dt>Trạng thái tài khoản</dt><dd><span class="customer-availability-badge">@Model.TrangThaiTaiKhoan</span></dd></div>
     </dl>
     @await Html.PartialAsync("_ValidationSummary")
